@@ -1,0 +1,13 @@
+# portfolio.yaml — índice de proyectos
+# Lo gestiona `skills/init.md`. Se puede editar a mano.
+
+owner: # tu nombre
+
+projects: []
+  # Ejemplo:
+  # - slug: verxion
+  #   name: Verxion
+  #   one_liner: "Fitness data + training intelligence"
+  #   status: active        # active | building | paused | archived
+  #   url: https://verxion.com
+  #   started: 2025-01
