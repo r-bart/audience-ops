@@ -2,6 +2,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+._*
 
 # Editor
 *.swp
@@ -13,6 +14,22 @@
 # Local environment
 .env
 .env.local
+.env.*.local
 
 # Logs
 *.log
+
+# Backups y temporales
+*.bak
+*.tmp
+tmp/
+.cache/
+
+# Por si se añade tooling más adelante
+node_modules/
+dist/
+build/
+
+# Espacio personal del usuario (no trackeado): notas crudas, drafts privados
+private/
+scratch/
