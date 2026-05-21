@@ -1,5 +1,5 @@
 ---
-name: audience-ops:draft
+name: audience-ops-draft
 description: Convierte una idea estructurada en un draft listo para un canal concreto. Aplica voz, formato del canal y ángulo de la idea. Soporta repurpose de una publicación existente a otro canal.
 ---
 
@@ -117,7 +117,7 @@ Si **todas** pasan, ofrecer cambiar el `status` de `draft` a `ready`. Si alguna 
 - Path del fichero.
 - Estado final (`draft` o `ready`).
 - Recordatorio del próximo paso:
-  - Si `draft`: "Itera sobre el fichero o reinvoca `/audience-ops:draft` para regenerar".
+  - Si `draft`: "Itera sobre el fichero o reinvoca `/audience-ops-draft` para regenerar".
   - Si `ready`: "Cópialo en <scheduler de `config.yaml`> cuando vayas a programarlo; `weekly` te lo recordará".
 
 ## Modo repurpose (`--from`)
@@ -147,7 +147,7 @@ Cuando se pasa `--from <publication-path>`:
 
 ## Errores y casos límite
 
-- **Idea no existe**: abortar con mensaje. Sugerir crearla con `/audience-ops:idea`.
+- **Idea no existe**: abortar con mensaje. Sugerir crearla con `/audience-ops-idea`.
 - **Canal no existe en el proyecto**: abortar. Listar canales disponibles.
 - **`voice.md` vacío o `_pendiente_`**: avisar de que el draft saldrá sin restricciones de voz; pedir confirmación al usuario antes de continuar.
 - **Idea sin hook**: pedir al usuario que añada un ángulo a la idea antes de draftear; o, si insiste, generar con un hook tentativo y marcarlo en la revisión guiada.

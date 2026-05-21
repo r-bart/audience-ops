@@ -4,6 +4,8 @@
 **Status**: Draft
 **Spec**: `/SPEC.md`
 
+> **Note (post-implementation)**: this plan references `skills/<name>.md` paths and `/audience-ops:<skill>` invocation. After dogfooding, both were updated to the actual Claude Code conventions: skills live at `.claude/skills/audience-ops-<name>/SKILL.md` and are invoked as `/audience-ops-<name>` (kebab-case; `:` is reserved for plugin-packaged skills). The plan text below is left as historical record — see README, AGENTS, SPEC and the canonical SKILL.md files for current paths and invocation.
+
 ---
 
 ## Overview

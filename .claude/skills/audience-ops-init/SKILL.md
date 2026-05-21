@@ -1,5 +1,5 @@
 ---
-name: audience-ops:init
+name: audience-ops-init
 description: Bootstrap del repo Audience Ops (si está vacío) o añade un nuevo proyecto. Encadena la creación de estructura, estrategia, voz y canales en un flujo guiado.
 ---
 
@@ -107,7 +107,7 @@ Si `defaults.project` en `config.yaml` está vacío y este es el primer proyecto
 
 ### Paso 6 · Sub-flujo · Estrategia
 
-Si existe `skills/strategy.md`, delegar la creación de `strategy.md` a esa skill invocándola sobre el nuevo proyecto.
+Si existe la skill `audience-ops-strategy` (`.claude/skills/audience-ops-strategy/SKILL.md`), delegar la creación de `strategy.md` a esa skill invocándola sobre el nuevo proyecto.
 
 Si no existe (caso bootstrap muy temprano), hacer una versión rudimentaria inline:
 
@@ -242,9 +242,9 @@ Mostrar al usuario:
 
 - Resumen de lo creado: ficheros, carpetas, canales registrados.
 - Siguientes pasos sugeridos:
-  - "Captura tu primera idea: `/audience-ops:idea \"<texto>\"`".
-  - "Cuando tengas 3–5 ideas, genera un primer draft: `/audience-ops:draft <idea-slug> <channel>`".
-  - "Revisa o profundiza la estrategia en cualquier momento: `/audience-ops:strategy`".
+  - "Captura tu primera idea: `/audience-ops-idea \"<texto>\"`".
+  - "Cuando tengas 3–5 ideas, genera un primer draft: `/audience-ops-draft <idea-slug> <channel>`".
+  - "Revisa o profundiza la estrategia en cualquier momento: `/audience-ops-strategy`".
 
 ## Escritura · Ficheros creados o modificados
 

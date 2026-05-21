@@ -70,15 +70,14 @@ audience-ops/                     ← repo template clonable
 ├── portfolio.yaml                ← qué proyectos existen
 ├── config.yaml                   ← cómo se comporta (defaults, integraciones)
 │
-├── skills/                       ← 5 playbooks markdown, agent-agnósticos
-│   ├── init.md
-│   ├── strategy.md
-│   ├── idea.md
-│   ├── draft.md
-│   └── weekly.md
-│
-├── .claude/                      ← glue de Claude Code (settings + descubrimiento de skills)
-│   └── settings.json
+├── .claude/                      ← glue de Claude Code
+│   ├── settings.json
+│   └── skills/                   ← 5 playbooks markdown, agent-agnósticos
+│       ├── audience-ops-init/SKILL.md
+│       ├── audience-ops-strategy/SKILL.md
+│       ├── audience-ops-idea/SKILL.md
+│       ├── audience-ops-draft/SKILL.md
+│       └── audience-ops-weekly/SKILL.md
 │
 └── projects/
     └── <slug>/
@@ -428,14 +427,14 @@ co:weekly --cleanup
 
 **Forma de distribución: repo template clonable.** El usuario clona el repo y obtiene en un solo paso la estructura + las skills. Cero instalación global.
 
-**Compatibilidad con otros agentes.** Las 5 skills son **playbooks markdown** ubicados en `skills/`. Cualquier agente (Claude Code, Cursor, Aider, otro Claude por API, o un humano leyendo) puede operar el sistema siguiendo el playbook correspondiente. Nada en la lógica de las skills depende de Claude Code.
+**Compatibilidad con otros agentes.** Las 5 skills son **playbooks markdown** ubicados en `.claude/skills/<slug>/SKILL.md`. Cualquier agente (Claude Code, Cursor, Aider, otro Claude por API, o un humano leyendo) puede operar el sistema siguiendo el playbook correspondiente. Nada en la lógica de las skills depende de Claude Code; el path bajo `.claude/skills/` se elige porque Claude Code los descubre de ahí automáticamente, pero el contenido es markdown puro.
 
 Cómo entra cada motor en el sistema:
 
 | Motor | Cómo invoca las skills |
 |---|---|
-| **Claude Code** | `.claude/settings.json` registra `skills/` como fuente de skills. Invocación natural: `/audience-ops:init`, `/audience-ops:draft`, etc. |
-| **Cursor / Aider / cualquier otro** | El usuario apunta al fichero: "sigue las instrucciones de `skills/draft.md` con esta idea y este canal". |
+| **Claude Code** | Descubre automáticamente cada `SKILL.md` en `.claude/skills/`. Invocación natural: `/audience-ops-init`, `/audience-ops-draft`, etc. (kebab-case; la sintaxis `<plugin>:<skill>` está reservada a skills empaquetadas como plugin). |
+| **Cursor / Aider / cualquier otro** | El usuario apunta al fichero: "sigue las instrucciones de `.claude/skills/audience-ops-draft/SKILL.md` con esta idea y este canal". |
 | **API directo** | El playbook se pasa como system prompt o instrucción. |
 
 `AGENTS.md` en raíz documenta esto para que cualquier agente que aterrice en el repo entienda cómo usarlo sin asumir Claude Code.
@@ -446,7 +445,7 @@ Cómo entra cada motor en el sistema:
 
 ## 10. Próximos pasos sugeridos
 
-1. **Bootstrap del repo:** crear `README.md`, `AGENTS.md`, `portfolio.yaml`, `config.yaml`, esqueleto de `skills/`, `.claude/settings.json` para descubrimiento de skills.
+1. **Bootstrap del repo:** crear `README.md`, `AGENTS.md`, `portfolio.yaml`, `config.yaml`, esqueleto de `.claude/skills/<slug>/SKILL.md` por skill, `.claude/settings.json`.
 2. **Escribir `init.md`** como playbook end-to-end — la skill más cargada, prueba del modelo de datos: crea estructura + primer proyecto + dispara strategy + voice + channels en cadena.
 3. **Escribir `idea.md` y `draft.md`** en su forma más simple — el flujo más corto que produce valor (captura → draft listo).
 4. **Dogfooding 2 semanas** sobre un proyecto real (Verxion u otro) antes de tocar `strategy` o `weekly`.

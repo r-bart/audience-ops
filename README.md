@@ -70,15 +70,14 @@ audience-ops/
 ├── portfolio.yaml        ← project index
 ├── config.yaml           ← behavior defaults
 │
-├── skills/               ← the 5 agent-agnostic markdown playbooks
-│   ├── init.md
-│   ├── idea.md
-│   ├── draft.md
-│   ├── strategy.md       (pending)
-│   └── weekly.md         (pending)
-│
 ├── .claude/              ← Claude Code glue
-│   └── settings.json
+│   ├── settings.json
+│   └── skills/           ← the agent-agnostic markdown playbooks (SKILL.md per skill)
+│       ├── audience-ops-init/SKILL.md
+│       ├── audience-ops-idea/SKILL.md
+│       ├── audience-ops-draft/SKILL.md
+│       ├── audience-ops-strategy/SKILL.md   (pending)
+│       └── audience-ops-weekly/SKILL.md     (pending)
 │
 └── projects/             ← one subdirectory per project
     └── <slug>/
@@ -147,7 +146,7 @@ Audience Ops is designed primarily for use with **Claude Code**, but any markdow
 ### Day 1 · Bootstrap
 
 ```
-/audience-ops:init
+/audience-ops-init
 ```
 
 Answer a short interview: your name, first project, positioning, voice, active channels. When done, you'll have:
@@ -159,7 +158,7 @@ Answer a short interview: your name, first project, positioning, voice, active c
 ### Day to day · Capture
 
 ```
-/audience-ops:idea "hook about how I measured HRV for 30 days"
+/audience-ops-idea "hook about how I measured HRV for 30 days"
 ```
 
 Quick mode: appends one line to the active project's `_inbox.md` with today's date. Zero friction.
@@ -167,7 +166,7 @@ Quick mode: appends one line to the active project's `_inbox.md` with today's da
 ### When an idea matures · Structure it
 
 ```
-/audience-ops:idea --promote "the cardio you weren't measuring"
+/audience-ops-idea --promote "the cardio you weren't measuring"
 ```
 
 Promote mode: asks for pillar, target channels, hook, and creates a structured file at `ideas/<slug>.md`. The original inbox line gets marked with a `→ ideas/<slug>.md` suffix for traceability.
@@ -175,7 +174,7 @@ Promote mode: asks for pillar, target channels, hook, and creates a structured f
 ### Turn an idea into a draft
 
 ```
-/audience-ops:draft cardio-rmssd newsletter
+/audience-ops-draft cardio-rmssd newsletter
 ```
 
 Reads the project's voice, the newsletter channel rules, and the idea's angle. Generates a draft with `subject`, `preheader`, and body. Shows it to you, writes it on confirmation, then runs a review checklist: if it passes, marks `status: ready`; otherwise stays `draft` with notes on what's missing.
@@ -183,7 +182,7 @@ Reads the project's voice, the newsletter channel rules, and the idea's angle. G
 ### Repurpose
 
 ```
-/audience-ops:draft cardio-rmssd x --from projects/verxion/publications/cardio-rmssd-newsletter.md
+/audience-ops-draft cardio-rmssd x --from projects/verxion/publications/cardio-rmssd-newsletter.md
 ```
 
 Adapts an existing publication to a different channel without losing the angle. Not copy-paste — reformats according to the destination channel's rules.
@@ -191,7 +190,7 @@ Adapts an existing publication to a different channel without losing the angle. 
 ### Weekly ritual *(pending, Phase 6)*
 
 ```
-/audience-ops:weekly
+/audience-ops-weekly
 ```
 
 - Inbox triage: promote, leave, or kill?
@@ -202,7 +201,7 @@ Adapts an existing publication to a different channel without losing the angle. 
 ### Quarterly cleanup *(pending, Phase 6)*
 
 ```
-/audience-ops:weekly --cleanup
+/audience-ops-weekly --cleanup
 ```
 
 Proposes archiving for old published items, abandoned drafts, killed ideas, paused projects. All with confirmation.
@@ -217,8 +216,8 @@ Audience Ops **does not publish**. When a publication reaches `status: ready`, o
 
 Skills are pure markdown playbooks. They work with:
 
-- **Claude Code** — autodiscovery via `.claude/settings.json`. Natural invocation with `/audience-ops:<skill>`.
-- **Cursor / Aider / Codex / others** — point at the file: *"follow the instructions in `skills/draft.md` with this idea and this channel"*.
+- **Claude Code** — skills autodiscovered from `.claude/skills/<slug>/SKILL.md`. Natural invocation with `/audience-ops-<skill>` (kebab-case; the `:` syntax is reserved for plugin-packaged skills).
+- **Cursor / Aider / Codex / others** — point at the file: *"follow the instructions in `.claude/skills/audience-ops-draft/SKILL.md` with this idea and this channel"*.
 - **Direct API** — pass the playbook as a system prompt.
 
 See [`AGENTS.md`](./AGENTS.md) for details.
@@ -230,11 +229,11 @@ See [`AGENTS.md`](./AGENTS.md) for details.
 **MVP in progress.** Phases 1–3 complete:
 
 - ✅ Phase 1 · Repo bootstrap.
-- ✅ Phase 2 · `skills/init.md`.
-- ✅ Phase 3 · `skills/idea.md` + `skills/draft.md`.
+- ✅ Phase 2 · `.claude/skills/audience-ops-init/SKILL.md`.
+- ✅ Phase 3 · `.claude/skills/audience-ops-idea/SKILL.md` + `.claude/skills/audience-ops-draft/SKILL.md`.
 - ⏳ Phase 4 · Dogfooding on a real project.
-- ⏳ Phase 5 · `skills/strategy.md`.
-- ⏳ Phase 6 · `skills/weekly.md` (normal + `--cleanup` modes).
+- ⏳ Phase 5 · `.claude/skills/audience-ops-strategy/SKILL.md`.
+- ⏳ Phase 6 · `.claude/skills/audience-ops-weekly/SKILL.md` (normal + `--cleanup` modes).
 
 See [`thoughts/plans/2026-05-21_audience-ops-mvp.md`](./thoughts/plans/2026-05-21_audience-ops-mvp.md) for the full plan and [`SPEC.md`](./SPEC.md) for the technical spec.
 

@@ -1,26 +1,26 @@
 # AGENTS.md
 
-Audience Ops es agent-agnóstico. Las 5 skills viven en [`skills/`](./skills/) como playbooks markdown puros. Cualquier agente capaz de leer markdown puede operar el sistema.
+Audience Ops es agent-agnóstico. Las 5 skills viven en [`.claude/skills/`](./.claude/skills/) como playbooks markdown puros (un directorio por skill, con `SKILL.md` dentro). Cualquier agente capaz de leer markdown puede operar el sistema.
 
 ## Cómo entra cada motor
 
 ### Claude Code
 
-Las skills se descubren automáticamente vía [`.claude/settings.json`](./.claude/settings.json). Invocación natural:
+Las skills se descubren automáticamente desde `.claude/skills/<slug>/SKILL.md`. Invocación natural (kebab-case; el formato `<plugin>:<skill>` está reservado a skills empaquetadas como plugin):
 
 ```
-/audience-ops:init
-/audience-ops:idea "hook sobre HRV en zona 1"
-/audience-ops:draft cardio-rmssd newsletter
-/audience-ops:strategy
-/audience-ops:weekly
+/audience-ops-init
+/audience-ops-idea "hook sobre HRV en zona 1"
+/audience-ops-draft cardio-rmssd newsletter
+/audience-ops-strategy
+/audience-ops-weekly
 ```
 
 ### Otros agentes (Cursor, Aider, Codex, etc.)
 
 Apuntar al fichero del playbook:
 
-> "Sigue las instrucciones de `skills/draft.md` con la idea `cardio-rmssd` y el canal `newsletter`."
+> "Sigue las instrucciones de `.claude/skills/audience-ops-draft/SKILL.md` con la idea `cardio-rmssd` y el canal `newsletter`."
 
 Los playbooks están escritos para ser **autocontenidos**: incluyen contexto, pasos a seguir, ficheros a leer, ficheros a escribir y criterios de éxito.
 
@@ -49,9 +49,9 @@ Pasar el contenido del playbook como system prompt o como instrucción al modelo
 
 ## Anatomía de un playbook
 
-Cada `skills/<name>.md` sigue esta estructura:
+Cada `.claude/skills/<slug>/SKILL.md` sigue esta estructura:
 
-1. **Frontmatter**: `name`, `description` (compatible con Claude Code skill format).
+1. **Frontmatter**: `name` (kebab-case, igual al nombre del directorio), `description` (compatible con Claude Code skill format).
 2. **Cuándo usar**: en qué situación se invoca.
 3. **Entradas**: qué necesita el agente del usuario o del filesystem.
 4. **Lectura previa**: ficheros que el agente lee antes de actuar.

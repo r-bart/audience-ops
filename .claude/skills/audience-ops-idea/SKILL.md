@@ -1,5 +1,5 @@
 ---
-name: audience-ops:idea
+name: audience-ops-idea
 description: Captura ideas rápido al inbox de un proyecto, o promueve una entrada del inbox a idea estructurada con pilar, canales y ángulo.
 ---
 
@@ -132,7 +132,7 @@ Mostrar:
 - Ruta del fichero creado.
 - Pilar asignado.
 - Canales destino previstos.
-- Recordatorio: "Cuando quieras draftear: `/audience-ops:draft <slug> <channel>`".
+- Recordatorio: "Cuando quieras draftear: `/audience-ops-draft <slug> <channel>`".
 
 ## Escritura · Ficheros creados o modificados
 
