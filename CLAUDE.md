@@ -16,7 +16,7 @@ Audience Ops follows [semver](https://semver.org/), starting at `v0.9.0`.
 | **Minor** (`0.X.0`) | New skill added (`audience-ops-strategy`, `audience-ops-weekly`). New mode added to an existing skill (e.g. `--from` in `draft`). New optional frontmatter field. Any additive, non-breaking behavior change. |
 | **Major** (`X.0.0`) | Breaking change: a playbook's inputs/outputs change shape, a frontmatter field is removed or renamed, a skill is renamed, file path conventions change. |
 
-**`v1.0.0` is reserved for**: all 5 MVP skills shipped (init ✅, idea ✅, draft ✅, strategy ⏳, weekly ⏳), validated through real-content use without critical frictions outstanding.
+**`v1.0.0` is reserved for**: the 5 MVP skills (init, idea, draft, strategy, weekly — all shipped as of v0.10.0) validated through real-content use without critical frictions outstanding.
 
 We start at `v0.9.0` (not `v0.1.0`) to signal that the foundation is functional and the trajectory is "close to MVP", not "first sketch".
 

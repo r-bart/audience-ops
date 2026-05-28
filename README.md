@@ -70,8 +70,8 @@ If you don't use markdown and don't have 2+ projects in flight, Notion or a sche
 ├── audience-ops-init/SKILL.md
 ├── audience-ops-idea/SKILL.md
 ├── audience-ops-draft/SKILL.md
-├── audience-ops-strategy/SKILL.md   (pending)
-└── audience-ops-weekly/SKILL.md     (pending)
+├── audience-ops-strategy/SKILL.md
+└── audience-ops-weekly/SKILL.md
 ```
 
 **Your content directory** (created by `/audience-ops-init`, lives in a repo of yours):
@@ -112,8 +112,8 @@ The two are **separate by design**: the skills are the tool, your content is you
 | `init` | Bootstrap the repo + first project. Chains strategy, voice, and channels creation in a guided flow. | ✅ |
 | `idea` | Two modes. **Quick**: capture one line into the project's inbox. **Promote**: turn an inbox entry into a structured idea (slug, pillar, channels, angle). | ✅ |
 | `draft` | Takes an idea + a channel and produces a draft respecting voice, channel format, and angle. Supports repurpose (`--from`) to adapt an existing publication to a different channel. | ✅ |
-| `strategy` | Interview to create or update a project's strategy: positioning, ICP, pillars, goals, anti-topics. | ⏳ Pending |
-| `weekly` | Weekly ritual: inbox triage, calendar view (global or per-project), hygiene of stale drafts and overdue ready items. `--cleanup` mode for quarterly cleanup. | ⏳ Pending |
+| `strategy` | Interview to create or update a project's strategy: positioning, ICP, pillars, goals, anti-topics. Warns when `last_reviewed` is stale. | ✅ |
+| `weekly` | Weekly ritual: inbox triage, calendar view (global or per-project), hygiene of stale drafts and overdue ready items. `--cleanup` mode for quarterly archive sweeps. | ✅ |
 
 Skills are **self-contained markdown playbooks**. Each one documents inputs, prior reads, steps, writes, and success criteria.
 
@@ -204,7 +204,7 @@ Reads the project's voice, the newsletter channel rules, and the idea's angle. G
 
 Adapts an existing publication to a different channel without losing the angle. Not copy-paste — reformats according to the destination channel's rules.
 
-### Weekly ritual · Triage & calendar *(pending, Phase 6)*
+### Weekly ritual · Triage & calendar
 
 ```
 /audience-ops-weekly
@@ -215,7 +215,7 @@ Adapts an existing publication to a different channel without losing the angle. 
 - Hygiene: stale drafts, overdue ready items, old inbox entries.
 - Decide which ideas move to draft this week.
 
-### Quarterly cleanup · Archive sweep *(pending, Phase 6)*
+### Quarterly cleanup · Archive sweep
 
 ```
 /audience-ops-weekly --cleanup
@@ -243,13 +243,13 @@ See [`AGENTS.md`](./AGENTS.md) for details.
 
 ## Current status
 
-**MVP in progress.** Phases 1–3 complete:
+**MVP shipped.** All 5 skills functional; v1.0.0 reserved for validation through real-content use.
 
 - ✅ Phase 1 · Repo bootstrap.
 - ✅ Phase 2 · `.claude/skills/audience-ops-init/SKILL.md`.
 - ✅ Phase 3 · `.claude/skills/audience-ops-idea/SKILL.md` + `.claude/skills/audience-ops-draft/SKILL.md`.
-- ⏳ Phase 5 · `.claude/skills/audience-ops-strategy/SKILL.md`.
-- ⏳ Phase 6 · `.claude/skills/audience-ops-weekly/SKILL.md` (normal + `--cleanup` modes).
+- ✅ Phase 5 · `.claude/skills/audience-ops-strategy/SKILL.md`.
+- ✅ Phase 6 · `.claude/skills/audience-ops-weekly/SKILL.md` (normal + `--cleanup` modes).
 
 See [`thoughts/plans/2026-05-21_audience-ops-mvp.md`](./thoughts/plans/2026-05-21_audience-ops-mvp.md) for the full plan and [`SPEC.md`](./SPEC.md) for the technical spec.
 

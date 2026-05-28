@@ -7,8 +7,10 @@
       "description": "Content operating system for indie hackers. Filesystem-first, agent-agnostic, multi-project, multi-channel.",
       "skills": [
         "audience-ops-init",
+        "audience-ops-strategy",
         "audience-ops-idea",
-        "audience-ops-draft"
+        "audience-ops-draft",
+        "audience-ops-weekly"
       ]
     }
   ]
