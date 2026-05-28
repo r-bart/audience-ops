@@ -1,12 +1,12 @@
 ---
 name: audience-ops-strategy
-description: "Interview para crear o actualizar el `strategy.md` de un proyecto (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
+description: "Interview para crear o actualizar el `strategy.md` de la instancia (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
 metadata:
   author: r-bart
-  version: "0.12.0"
+  version: "0.2.0"
 ---
 
-# strategy — Crear o actualizar la estrategia de un proyecto
+# strategy — Crear o actualizar la estrategia de la instancia
 
 ## Cuándo usar esta skill
 
@@ -58,7 +58,9 @@ Estrategia y voz son **ortogonales**:
 |---|---|---|
 | Pregunta que responde | **Qué** cuentas y **a quién** | **Cómo** lo cuentas |
 | Cambia cuando | El ICP cambia o sumas pilar | Casi nunca; tu voz es tuya |
-| Entre proyectos | Estrategia única por proyecto | Misma voz puede aplicar a varios |
+| Lifecycle | Se refresca cada ~4 meses | Estable a lo largo del tiempo |
+
+(En el modelo single-instance v0.2.0+, ambas viven dentro de la misma instancia y son únicas por repo. Antes — modelo multi-project — la voz podía aplicarse a varios proyectos del mismo portfolio; ahora cada instancia tiene su propio `voice.md` independiente.)
 
 Mezclarlas en un fichero invalidaría `last_reviewed` cada vez que tocas una coma de la voz (y al revés). Canales son otra dimensión más (formato + cadencia + ajustes de voz por plataforma) y viven en `channels/<id>.md`. Una skill = un concepto. La voz se edita a mano hoy; `voice.md` es corto.
 
@@ -144,7 +146,7 @@ Aprendizajes recientes del pilar `<pillar-slug>`:
 - "Una respuesta tardía: @user preguntó si esto aplica a Zone 2." (cardio-rmssd-newsletter, 2026-04-02)
 ```
 
-Por qué `scheduled_for` y no `mtime`: las publicaciones reciben aprendizajes a lo largo del tiempo (3b en weekly normal, paso 6 en cleanup) — eso modifica el mtime sin cambiar la fecha de publicación. Ordenar por mtime mostraría "recientes" que son aprendizajes anotados retroactivamente sobre publicaciones antiguas. `scheduled_for` es la fecha real.
+Por qué `scheduled_for` y no `mtime`: las publicaciones reciben aprendizajes a lo largo del tiempo (3b en weekly normal, Cleanup 5 en `--cleanup`) — eso modifica el mtime sin cambiar la fecha de publicación. Ordenar por mtime mostraría "recientes" que son aprendizajes anotados retroactivamente sobre publicaciones antiguas. `scheduled_for` es la fecha real.
 
 Si una publicación tiene aprendizajes pero **no tiene `scheduled_for`** (estado corrupto: aprendizajes sin status published consistente), incluirla al final del grupo y avisar al usuario ("(publicación sin scheduled_for; revisar)").
 

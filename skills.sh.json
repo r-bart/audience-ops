@@ -4,7 +4,7 @@
   "groupings": [
     {
       "title": "Audience Ops",
-      "description": "Content operating system for indie hackers. Filesystem-first, agent-agnostic, multi-project, multi-channel.",
+      "description": "Content operating system for indie hackers. Filesystem-first, agent-agnostic, single-instance per repo, multi-channel.",
       "skills": [
         "audience-ops-init",
         "audience-ops-strategy",

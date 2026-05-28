@@ -1,6 +1,6 @@
 # Audience Ops — Plan Final (MVP)
 
-> Sistema operativo de contenidos para indie hackers: ficheros estructurados + skills de Claude que vehiculan el workflow de estrategia → idea → calendario → publicación, multicanal y multi-proyecto. La publicación se delega a herramientas de terceros (Typefully, Buffer, Ghost, etc.).
+> Sistema operativo de contenidos para indie hackers: ficheros estructurados + skills de Claude que vehiculan el workflow de estrategia → idea → calendario → publicación, multicanal, single-instance por repo. La publicación se delega a herramientas de terceros (Typefully, Buffer, Ghost, etc.).
 
 ---
 
@@ -30,7 +30,7 @@
 **Dentro.**
 - Estructura de ficheros canónica.
 - 5 skills que cubren el workflow.
-- Multi-proyecto y multi-canal desde el día 1.
+- Multi-canal desde el día 1. Single-instance per repo (v0.2.0+ tras refactor; multi-proyecto se logra teniendo el tool en varios repos, no en uno).
 - Newsletter como canal de primera clase (junto a X, LinkedIn, blog).
 - Hygiene continua + cleanup trimestral integrados en una sola skill (`weekly`).
 - Workflow hasta *publicación lista para enviar* — el draft queda en un fichero que el usuario copia/pega en su scheduler.
@@ -110,13 +110,13 @@ behavior:
   stale_draft_days: 30                   # weekly flagea drafts más viejos sin tocar
   stale_inbox_days: 30                   # weekly flagea entradas de inbox más viejas
   strategy_review_months: 4              # strategy avisa si last_reviewed es más viejo
-  paused_archive_threshold_months: 6     # vestigial post-v0.12.0; conservado por compatibilidad
+  paused_archive_threshold_months: 6     # vestigial post-single-instance refactor; conservado por compatibilidad
   learnings_prompt_threshold_days: 60    # weekly --cleanup ofrece añadir aprendizajes retroactivos
   prompt_learnings_on_publish: true      # weekly hygiene 3b pregunta por aprendizajes
   scheduler: typefully                   # hint informativo para el handoff ready → published
 ```
 
-Sin bloque `defaults:` (eliminado en v0.12.0). El `scheduler` se conserva como hint dentro de `behavior:`. Sin `defaults.project` — el "proyecto" es implícitamente el repo host.
+Sin bloque `defaults:` (eliminado en v0.2.0). El `scheduler` se conserva como hint dentro de `behavior:`. Sin `defaults.project` — el "proyecto" es implícitamente el repo host.
 
 ### `audience-ops/strategy.md`
 
@@ -331,7 +331,7 @@ Todas las rutas son relativas a la instancia (`<repo-host>/audience-ops/`).
 2. Drafts abandonados → mover a `publications/archive/abandoned/`.
 3. Ideas killed → mover a `ideas/archive/`.
 4. `strategy.md` con `last_reviewed` > 4 meses → propone revisión.
-5. (Eliminado en v0.12.0: la propuesta de archivar proyectos pausados vivía en `portfolio.yaml`, que ya no existe).
+5. (Eliminado en el refactor single-instance: la propuesta de archivar proyectos pausados vivía en `portfolio.yaml`, que ya no existe).
 
 Toda acción requiere confirmación. Nada se mueve solo.
 
@@ -440,7 +440,7 @@ Cómo entra cada motor en el sistema:
 
 ## 10. Próximos pasos sugeridos
 
-**Cambios arquitecturales (v0.12.0)**:
+**Cambios arquitecturales (single-instance refactor, v0.2.0)**:
 
 - Multi-proyecto deja de ser nativo del sistema. Single-instance por repo bajo `audience-ops/`.
 - `portfolio.yaml` y `projects/<slug>/` desaparecen del modelo.

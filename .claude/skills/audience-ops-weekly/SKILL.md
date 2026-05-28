@@ -3,7 +3,7 @@ name: audience-ops-weekly
 description: "Ritual semanal del operating system de contenidos: triage del inbox, vista de calendario, hygiene continua. Modo `--cleanup` para limpieza trimestral (archivado de publicadas viejas, drafts abandonados, ideas killed, proyectos paused)."
 metadata:
   author: r-bart
-  version: "0.12.0"
+  version: "0.2.0"
 ---
 
 # weekly — Ritual semanal + cleanup trimestral
@@ -20,7 +20,7 @@ Es la única skill que **escribe estados** masivamente y mueve ficheros a `archi
 
 - Opcional: `--cleanup` para modo trimestral. Sin esa flag, modo normal.
 
-El "proyecto" es implícitamente la instancia local (`./audience-ops/`). Calendario, hygiene y cleanup operan sobre esta instancia. Cross-instance no soportado en v0.12.x.
+El "proyecto" es implícitamente la instancia local (`./audience-ops/`). Calendario, hygiene y cleanup operan sobre esta instancia. Cross-instance no soportado.
 
 ## Lectura previa
 
@@ -57,9 +57,9 @@ Tres sufijos posibles, mutuamente excluyentes. Una línea killed o promovida ya 
 
 ### Paso 1 · Triage del inbox
 
-Para cada proyecto en alcance:
+Sobre la instancia local:
 
-1. Leer `_inbox.md`.
+1. Leer `audience-ops/ideas/_inbox.md`.
 2. Identificar entradas **sin sufijo** (las que no acaban en `→ ideas/...` ni `→ killed YYYY-MM-DD`).
 3. Para cada entrada pendiente, mostrar al usuario:
 
@@ -93,11 +93,11 @@ Reglas:
 - Items sin `scheduled_for` → no aparecen.
 - Items con `status: published` → no aparecen (ya hechos).
 - Items con `scheduled_for` en el pasado y `status: ready` → marcar `(overdue)` y resaltar (van a la sección hygiene).
-- Vista global por defecto; si se pasó slug → filtrar.
+- Vista de la instancia local. Sin argumentos de filtrado de proyecto (no aplica en single-instance).
 
 Detección de **conflicto de slot**: si dos publicaciones de mismo canal coinciden en la misma fecha, avisar.
 
-Detección de **dispersión per-canal**: por canal y por proyecto, contar items en las próximas 4 semanas; comparar con `cadence` de `channels/<id>.md`. Si por debajo (ej. newsletter `1/week` con 0 ready en 4 semanas), avisar.
+Detección de **dispersión per-canal**: por canal de la instancia, contar items en las próximas 4 semanas; comparar con `cadence` de `audience-ops/channels/<id>.md`. Si por debajo (ej. newsletter `1/week` con 0 ready en 4 semanas), avisar.
 
 ### Paso 3 · Hygiene continua
 
@@ -128,7 +128,7 @@ Para cada uno, mostrar y preguntar:
 
 Si el usuario aporta bullets, **append** un `## Aprendizajes` al final del cuerpo del fichero de la publicación con esos bullets (texto literal de cada bullet, sin interpretar markdown como headings). Si la sección ya existía (caso raro: aprendizajes añadidos manualmente antes del weekly), agregar bullets al final de la sección existente. Si el usuario salta, no se crea sección.
 
-Si `prompt_learnings_on_publish: false`, el prompt se suprime — el usuario puede añadir aprendizajes a mano editando el fichero o esperar a `weekly --cleanup` (paso 6) para barrido retroactivo.
+Si `prompt_learnings_on_publish: false`, el prompt se suprime — el usuario puede añadir aprendizajes a mano editando el fichero o esperar a `weekly --cleanup` (Cleanup 5) para barrido retroactivo.
 
 #### 3c · Inbox stale
 

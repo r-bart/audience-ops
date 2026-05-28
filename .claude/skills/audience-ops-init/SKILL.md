@@ -3,7 +3,7 @@ name: audience-ops-init
 description: "Inicializa una instancia de Audience Ops en el directorio actual creando una carpeta `audience-ops/` con la estructura completa (strategy, voice, channels, ideas, publications). Una instancia por repo."
 metadata:
   author: r-bart
-  version: "0.12.0"
+  version: "0.2.0"
 ---
 
 # init — Bootstrap de una instancia de Audience Ops
@@ -24,7 +24,7 @@ Una instancia por repo. Si necesitas operar varios proyectos en paralelo, instal
 Antes de actuar, leer:
 
 1. `./audience-ops/config.yaml` — si existe ya, ABORT con mensaje: "audience-ops/ ya está inicializado en este directorio. Para editar, modifica los ficheros directamente. Para empezar de cero, `rm -rf audience-ops/` antes de re-invocar."
-2. `./portfolio.yaml`, `./projects/` — si existen (residuos de v0.11.x): avisar al usuario una vez ("detectado layout v0.11.x; ver release notes de v0.12.0 para migración manual") y continuar con la creación de `audience-ops/` en paralelo.
+2. `./portfolio.yaml`, `./projects/` — si existen (residuos del modelo pre-single-instance): avisar al usuario una vez ("detectado layout legacy; ver release notes de v0.2.0 para migración manual") y continuar con la creación de `audience-ops/` en paralelo.
 
 ## Pasos
 
@@ -251,7 +251,7 @@ Mostrar al usuario:
 ## Errores y casos límite
 
 - **`./audience-ops/` ya existe con config.yaml**: abortar con mensaje claro. No sobreescribir.
-- **Layout v0.11.x detectado** (presencia de `./portfolio.yaml` o `./projects/`): avisar una vez, continuar creando `audience-ops/` en paralelo. La migración manual es decisión del usuario.
+- **Layout legacy detectado** (presencia de `./portfolio.yaml` o `./projects/` — del modelo pre-single-instance): avisar una vez, continuar creando `audience-ops/` en paralelo. La migración manual es decisión del usuario.
 - **Usuario interrumpe a mitad** (por ejemplo, tras crear estructura pero antes de canales): dejar lo creado, avisar de qué falta, sugerir reanudar invocando `init` (que detectará `audience-ops/` parcial y abortará — el usuario completa a mano).
 - **Channel `id` desconocido**: aceptar, placeholder en formato + warning.
 - **Usuario no quiere voz aún**: crear `voice.md` con secciones marcadas `_pendiente_`.

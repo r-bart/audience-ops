@@ -1,16 +1,16 @@
 ---
 name: audience-ops-idea
-description: "Captura ideas rápido al inbox de un proyecto, o promueve una entrada del inbox a idea estructurada con pilar, canales y ángulo."
+description: "Captura ideas rápido al inbox de la instancia, o promueve una entrada del inbox a idea estructurada con pilar, canales y ángulo."
 metadata:
   author: r-bart
-  version: "0.12.0"
+  version: "0.2.0"
 ---
 
 # idea — Captura y promoción de ideas
 
 ## Cuándo usar esta skill
 
-- **Modo quick**: el usuario tiene una idea suelta y quiere guardarla sin fricción. Se añade una línea al `_inbox.md` del proyecto.
+- **Modo quick**: el usuario tiene una idea suelta y quiere guardarla sin fricción. Se añade una línea al `audience-ops/ideas/_inbox.md` de la instancia.
 - **Modo promote**: una entrada del inbox (o un texto formal) merece convertirse en idea estructurada con pilar, canales destino, ángulo y notas. Se crea un fichero en `ideas/`.
 
 Una sola skill cubre ambos modos.

@@ -111,7 +111,9 @@ The CLI compares **GitHub tree SHAs** of the skill folder, not git tags or `meta
 
 When you edit a playbook, you're editing the deliverable. Treat it like code.
 
-**Modelo de uso (v0.12.0+)**: Audience Ops es single-instance-per-repo. Cada `init` crea una carpeta `audience-ops/` en el directorio actual del invocador. El "proyecto" se deriva del nombre del repo host. Multi-proyecto se logra teniendo el tool instalado en varios repos. Cualquier mención histórica a `portfolio.yaml` o `projects/<slug>/` en commits/plans/specs de v0.11.x o anteriores es vestigial — no se aplica al modelo actual.
+**Modelo de uso (v0.2.0+)**: Audience Ops es single-instance-per-repo. Cada `init` crea una carpeta `audience-ops/` en el directorio actual del invocador. El "proyecto" se deriva del nombre del repo host. Multi-proyecto se logra teniendo el tool instalado en varios repos. Cualquier mención histórica a `portfolio.yaml` o `projects/<slug>/` en commits/plans/specs de v0.11.x o v0.12.0 anteriores es vestigial — no se aplica al modelo actual.
+
+**Sobre la numeración v0.12.0 → v0.2.0**: v0.12.0 fue tagueada brevemente con el refactor single-instance, pero el numbering 0.12 era inflado para algo aún sin validar via dogfooding. v0.2.0 renormalizada al estado real del proyecto (pre-MVP-validado). v0.12.0 sigue existiendo como tag histórico pero v0.2.0 es la versión canónica del single-instance model.
 
 ---
 

@@ -3,7 +3,7 @@ name: audience-ops-draft
 description: "Convierte una idea estructurada en un draft listo para un canal concreto. Aplica voz, formato del canal y ángulo de la idea. Soporta repurpose de una publicación existente a otro canal."
 metadata:
   author: r-bart
-  version: "0.12.0"
+  version: "0.2.0"
 ---
 
 # draft — Idea + canal → publicación
@@ -140,7 +140,7 @@ Cuando se pasa `--from <publication-path>`:
 
 Cuando se pasa `--to <ch1,ch2,...>` **junto con `--from <publication-path>`**: batch repurpose de una publicación origen a N canales destino en una sola invocación.
 
-`--to` sin `--from` no está soportado en v0.11.x (ver "Errores y casos límite"). Para draftear una idea desde cero a varios canales, hoy se invoca `draft` una vez por canal.
+`--to` sin `--from` no está soportado (ver "Errores y casos límite"). Para draftear una idea desde cero a varios canales, se invoca `draft` una vez por canal.
 
 ### Pre-flight
 

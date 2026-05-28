@@ -1,6 +1,6 @@
 # Audience Ops
 
-> A content operating system for indie hackers. Filesystem-first, agent-agnostic, multi-project, multi-channel. Publishing is delegated to tools you already use (Typefully, Buffer, Ghost, Beehiiv).
+> A content operating system for indie hackers. Filesystem-first, agent-agnostic, single-instance per repo, multi-channel. Publishing is delegated to tools you already use (Typefully, Buffer, Ghost, Beehiiv).
 
 ---
 
@@ -280,14 +280,14 @@ See [`AGENTS.md`](./AGENTS.md) for details.
 
 ## Current status
 
-**MVP shipped + architecture simplified.** All 5 skills functional under the v0.12.0 single-instance-per-repo model. v1.0.0 reserved for validation through real-content use.
+**MVP shipped + architecture simplified.** All 5 skills functional under the v0.2.0 single-instance-per-repo model. v1.0.0 reserved for validation through real-content use.
 
 - ✅ Phase 1 · Repo bootstrap.
 - ✅ Phase 2 · `.claude/skills/audience-ops-init/SKILL.md`.
 - ✅ Phase 3 · `.claude/skills/audience-ops-idea/SKILL.md` + `.claude/skills/audience-ops-draft/SKILL.md`.
 - ✅ Phase 5 · `.claude/skills/audience-ops-strategy/SKILL.md`.
 - ✅ Phase 6 · `.claude/skills/audience-ops-weekly/SKILL.md` (normal + `--cleanup` modes).
-- ✅ Phase 7 · v0.12.0 single-instance-per-repo refactor: killed `portfolio.yaml` + `projects/<slug>/` nesting; one `audience-ops/` namespace per host repo.
+- ✅ Phase 7 · v0.2.0 single-instance-per-repo refactor: killed `portfolio.yaml` + `projects/<slug>/` nesting; one `audience-ops/` namespace per host repo.
 
 See [`thoughts/plans/2026-05-21_audience-ops-mvp.md`](./thoughts/plans/2026-05-21_audience-ops-mvp.md) for the full plan and [`SPEC.md`](./SPEC.md) for the technical spec.
 
