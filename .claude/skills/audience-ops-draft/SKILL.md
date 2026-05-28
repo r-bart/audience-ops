@@ -3,7 +3,7 @@ name: audience-ops-draft
 description: "Convierte una idea estructurada en un draft listo para un canal concreto. Aplica voz, formato del canal y ángulo de la idea. Soporta repurpose de una publicación existente a otro canal."
 metadata:
   author: r-bart
-  version: "0.10.2"
+  version: "0.11.0"
 ---
 
 # draft — Idea + canal → publicación
@@ -18,6 +18,7 @@ metadata:
 - **idea-slug**: el slug del fichero de idea (sin `.md`).
 - **channel**: id del canal destino (debe existir en `projects/<slug>/channels/<channel>.md`).
 - Opcional **--from `<publication-path>`**: ruta a una publicación ya existente que se quiere adaptar. Si se pasa, la idea-slug puede inferirse del frontmatter `idea:` de esa publicación.
+- Opcional **--to `<ch1,ch2,...>`**: lista comma-separated de canales destino para **batch repurpose**. Cuando se usa con `--from`, transforma la publicación origen a cada uno de los canales destino en una sola invocación, generando un fichero por canal. Sin `--from`, batch desde una idea pelada (mismo behavior, N drafts en una invocación). Pre-flight: si algún canal listado no existe en el proyecto, abortar antes de generar nada.
 - Opcional **slug del proyecto**. Si no, usar `defaults.project` de `config.yaml`. Si no, preguntar.
 
 ## Lectura previa
@@ -135,6 +136,42 @@ Cuando se pasa `--from <publication-path>`:
 
 **Importante**: el repurpose no es copy-paste. Si el contenido no se puede adaptar al canal destino sin perder el ángulo, decírselo al usuario y abortar.
 
+## Modo batch (`--to`)
+
+Cuando se pasa `--to <ch1,ch2,...>` (combinable con `--from`):
+
+### Pre-flight
+
+1. Parsear la lista comma-separated en N canal-ids.
+2. Para cada `<channel>`, verificar que existe `projects/<slug>/channels/<channel>.md`. Si **alguno** falta, abortar listando los que faltan. Sin esto se genera basura.
+3. Validar que ningún canal destino aparece duplicado (warning, no error).
+4. Si `--from` también se pasa: leer la publicación origen una vez. Si no, leer la idea y proceder como modo normal × N.
+
+### Generación secuencial
+
+Para cada canal destino, en orden de aparición:
+
+1. Ejecutar el flujo de generación de modo normal (lectura de voice + canal + idea + opcional origen → componer contexto → generar → mostrar → confirmar → escribir → review).
+2. Cada draft escribe `projects/<slug>/publications/<idea-slug>-<channel>.md`.
+3. Si el fichero ya existe, aplica el flujo existente "sobreescribir / iterar / abandonar" para ese canal individual. No se aplica blanket-yes para el batch.
+4. Si la review checklist falla en un canal individual, ese fichero queda como `draft` con notas; el siguiente canal sigue su curso sin verse afectado.
+
+### Particularidades
+
+- **Rechazo individual del usuario** (decir "no" al confirmar un draft generado): el fichero NO se escribe, el siguiente canal procede.
+- **Abort mid-batch** (usuario interrumpe): los drafts ya confirmados/escritos quedan; el resumen final refleja qué se completó.
+- **Canal destino == canal del origen** (en modo `--from`): warning ("estás regenerando el canal origen — ¿continúas?"), permitir tras confirmación. Útil cuando se quiere reescribir el origen con un ángulo distinto.
+
+### Resumen final
+
+Tras el batch, renderizar tabla:
+
+| Canal destino | Resultado | Path |
+|---|---|---|
+| linkedin | ready | `projects/<slug>/publications/<idea>-linkedin.md` |
+| x | draft (review failed: subject) | `projects/<slug>/publications/<idea>-x.md` |
+| blog | rechazado por el usuario | (no escrito) |
+
 ## Escritura · Ficheros creados o modificados
 
 | Fichero | Acción |
@@ -157,6 +194,10 @@ Cuando se pasa `--from <publication-path>`:
 - **Newsletter sin generar `subject` válido** (>50 chars): no marcar `ready`. Pedir al usuario que afine o regenerar.
 - **Repurpose desde un canal muy distinto** (ej. newsletter → X): si la longitud no entra, ofrecer dividir en varias publicaciones (no asumir).
 - **El draft generado contiene "anti-temas"** listados en `strategy.md`: detectar y avisar antes de escribir.
+- **Modo `--to` con canal inexistente**: pre-flight aborta listando todos los canales faltantes. No se genera nada.
+- **Modo `--to` con un solo canal**: behavior idéntico a modo single-channel; el flag se acepta por simetría.
+- **Modo `--to` mezclado con `--from <publication-path>` cuyo canal está en la lista**: warning de regeneración del origen, permitir con confirmación explícita.
+- **Modo `--to` con interrupt mid-batch**: los drafts confirmados quedan escritos; el resto se omite; resumen lista lo completado.
 
 ## Principios que aplica
 

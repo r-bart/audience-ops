@@ -3,7 +3,7 @@ name: audience-ops-strategy
 description: "Interview para crear o actualizar el `strategy.md` de un proyecto (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
 metadata:
   author: r-bart
-  version: "0.10.2"
+  version: "0.11.0"
 ---
 
 # strategy — Crear o actualizar la estrategia de un proyecto
@@ -48,6 +48,8 @@ Excepción práctica: **Pilares** sin al menos uno deja a `idea --promote` y `dr
 
 Por qué la estructura es fija (principio "Convención sobre configuración" del SPEC): cualquier skill o agente puede ir a buscar "## Objetivos" en cualquier `strategy.md` y saber que estará — aunque esté vacía. Cero adivinanza estructural.
 
+**Una nota sobre aprendizajes**: en modo update, strategy lee las secciones `## Aprendizajes` de las publicaciones de cada pilar y te ofrece refinar la descripción del pilar basándote en lo que aprendiste en uso real. Sin aprendizajes, el flujo sigue normal — solo es un acelerador, no un requisito.
+
 ### Por qué no se toca `voice.md` ni canales
 
 Estrategia y voz son **ortogonales**:
@@ -72,6 +74,7 @@ Antes de actuar, leer:
 1. `config.yaml` — para `defaults.project` y `strategy_review_months`.
 2. `portfolio.yaml` — para validar que el proyecto existe y leer su `one_liner` (contexto inicial del interview).
 3. `projects/<slug>/strategy.md` — si existe, para modo update.
+4. `projects/<slug>/publications/*.md` (excluir `archive/`) — leer las secciones `## Aprendizajes` agrupadas por pilar (vía `idea:` del frontmatter de publicación → `pillar:` del frontmatter de la idea) para el modo update de bloque 3.3.
 
 Si **no existe** `projects/<slug>/strategy.md` y tampoco el directorio del proyecto: abortar y sugerir `/audience-ops-init`.
 
@@ -133,6 +136,35 @@ Para cada pilar (entre 2 y 5; si pide más de 5, advertir que se diluye):
 - **Por qué este pilar y no otro** (criterio de inclusión).
 
 Si en modo update, mostrar pilares actuales y permitir añadir / eliminar / renombrar / reescribir descripción.
+
+**En modo update, antes de iterar cada pilar**:
+
+1. Recorrer `projects/<slug>/publications/*.md` (excluyendo `archive/`).
+2. Para publicaciones cuyo `idea:` apunta a una idea con `pillar: <este-pilar>` en su frontmatter, extraer los bullets de la sección `## Aprendizajes` si existe.
+3. Tomar las **3-5 más recientes por mtime** (proxy del orden cronológico) y mostrarlas como contexto:
+
+```
+📒 Aprendizajes recientes del pilar `<pillar-slug>`:
+- "El hook con dato concreto funcionó mejor que el ángulo personal." (cardio-rmssd-newsletter)
+- "Subject line tenía 53 chars — algunos clientes lo cortaron." (cardio-rmssd-newsletter)
+- "Una respuesta tardía: @user preguntó si esto aplica a Zone 2." (cardio-rmssd-newsletter)
+```
+
+4. Preguntar al usuario:
+
+> "¿refinar la descripción de este pilar basándote en estos aprendizajes? (refinar / dejar / ver más bullets)"
+
+- **Refinar** → entra en el sub-interview del pilar (mantener / refinar / reescribir descripción) con los aprendizajes como contexto activo.
+- **Dejar** → no toca la descripción; sigue al siguiente pilar.
+- **Ver más bullets** → muestra hasta 10 bullets, después se vuelve a preguntar.
+
+Si **no hay aprendizajes** registrados en ese pilar:
+
+```
+📒 (no hay aprendizajes registrados todavía para este pilar)
+```
+
+Y el flujo sigue al sub-interview normal del pilar sin contexto extra. Nunca bloquea el interview.
 
 **Importante**: el frontmatter de la idea (`pillar:`) y de la publicación referencian estos slugs. Cambiar un slug = inconsistencia con ideas previas. Si el usuario renombra un pilar, avisar de que las ideas/publicaciones existentes con ese pilar quedarán "huérfanas" hasta que se actualicen (no es un error de skill, es una decisión del usuario).
 

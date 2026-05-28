@@ -213,6 +213,8 @@ Promote mode: asks for pillar, target channels, hook, and creates a structured f
 
 Reads the project's voice, the newsletter channel rules, and the idea's angle. Generates a draft with `subject`, `preheader`, and body. Shows it to you, writes it on confirmation, then runs a review checklist: if it passes, marks `status: ready`; otherwise stays `draft` with notes on what's missing.
 
+> The idea-slug is mandatory by design — the idea file is the anchor that makes cross-channel repurpose coherent later. If you want to draft something timely without first formalizing an idea, run `/audience-ops-idea --promote "<text>"` first; it's a 30-second interview.
+
 ### Repurpose · Adapt to another channel
 
 ```
@@ -239,6 +241,22 @@ Adapts an existing publication to a different channel without losing the angle. 
 ```
 
 Proposes archiving for old published items, abandoned drafts, killed ideas, paused projects. All with confirmation.
+
+### Calendar consult · Ask for the view you need
+
+There is no `calendar.md` or `kanban.md` file. The state lives in each publication's frontmatter (`status`, `scheduled_for`), and any view is computed on demand by walking `projects/*/publications/*.md` (excluding `archive/`).
+
+If you only want to see the view without running the full `weekly` ritual, ask your agent directly:
+
+**By week** (calendar layout):
+
+> *"Show me publications with future `scheduled_for` in `projects/*/publications/`, grouped by ISO week."*
+
+**By status** (kanban layout):
+
+> *"Group all publications by `status` (draft / ready / published / overdue) instead of by date."*
+
+Both queries return a regenerated view from the same primary state — zero drift, zero sync. Filter or pivot however the moment requires.
 
 ### Publishing · Manual handoff
 

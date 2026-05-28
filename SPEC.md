@@ -308,6 +308,27 @@ preheader: "30 días midiendo HRV en zonas suaves cambiaron mi semana de entreno
 
 Estado vive solo aquí. El proyecto se deriva del path.
 
+### `## Aprendizajes` (opcional, post-publicación)
+
+Cuando una publicación llega a `status: published`, puede acumular una sección opcional `## Aprendizajes` al final del cuerpo, con bullets libres:
+
+```markdown
+[cuerpo de la publicación]
+
+## Aprendizajes
+
+- El hook con dato concreto funcionó mejor que el ángulo personal.
+- Subject line tenía 53 chars — algunos clientes lo cortaron en preview.
+- Una respuesta nominal: "@user" preguntó si esto aplica a Zone 2.
+```
+
+Reglas:
+- **Estructura libre**: bullets en plain text, sin schema. Se valoran "qué funcionó / qué no / para la próxima" pero la forma exacta queda al usuario.
+- **Opcional**: una publicación published sin `## Aprendizajes` es válida.
+- **Append-only en la práctica**: añade bullets a lo largo del tiempo si emergen nuevos aprendizajes (ej. una respuesta tardía).
+- **Lo leen**: `weekly` (para hygiene retroactiva en cleanup) y `strategy` (para surface y posible iteración de pilares en modo update).
+- **No es analítica**: aprendizajes son cualitativos. Engagement / open-rate / subscribers siguen out-of-scope per §2.
+
 ---
 
 ## 6. Skills MVP (5)
@@ -317,7 +338,7 @@ Estado vive solo aquí. El proyecto se deriva del path.
 | `init` | Bootstrap: estructura raíz + primer proyecto (encadena strategy + voice + canales en flujo guiado) | — | toda la estructura |
 | `strategy` | Interview para crear/actualizar `strategy.md`. Avisa si `last_reviewed` pasa del umbral | `strategy.md` | `strategy.md` |
 | `idea` | Dos modos: captura rápida al `_inbox` con prefijo de fecha; o promoción a idea estructurada (slug, pilar, canales, ángulo) | `strategy.md` (pilares), `_inbox.md` | `_inbox.md`, `ideas/<slug>.md` |
-| `draft` | Idea + canal → draft en `publications/`. Repurpose = misma skill con una publicación existente como input. Incluye revisión final antes de marcar `ready` | `voice.md`, `channels/<id>.md`, idea, publicación existente (si repurpose) | `publications/<...>.md` |
+| `draft` | Idea + canal → draft en `publications/`. Repurpose = misma skill con una publicación existente como input. Incluye revisión final antes de marcar `ready` | `voice.md`, `channels/<id>.md`, idea (idea-slug obligatorio; anchor para repurpose), publicación existente (si repurpose) | `publications/<...>.md` |
 | `weekly` | Ritual: triage del inbox, vista de calendario global y/o per-project, qué promover a draft, qué revisar, hygiene continua. Modo `--cleanup` para limpieza trimestral | todo | mueve estados en frontmatter, archiva |
 
 ### Detalle de `weekly` (la skill más cargada)

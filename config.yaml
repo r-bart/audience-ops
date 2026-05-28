@@ -16,3 +16,5 @@ behavior:
   stale_inbox_days: 30                   # weekly flagea entradas de inbox más viejas
   strategy_review_months: 4              # strategy avisa si last_reviewed es más viejo
   paused_archive_threshold_months: 6     # weekly --cleanup propone archivar proyectos paused tras este tiempo
+  learnings_prompt_threshold_days: 60    # weekly --cleanup ofrece añadir aprendizajes retroactivos a published más viejas que esto sin la sección
+  prompt_learnings_on_publish: true      # weekly hygiene 3b pregunta por aprendizajes al confirmar ready→published. false suprime el prompt

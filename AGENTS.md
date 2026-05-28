@@ -24,6 +24,8 @@ Apuntar al fichero del playbook:
 
 Los playbooks están escritos para ser **autocontenidos**: incluyen contexto, pasos a seguir, ficheros a leer, ficheros a escribir y criterios de éxito.
 
+Para consultas read-only sobre el estado (calendario, kanban por status, qué pilar acumula publicaciones), no hace falta apuntar al fichero de una skill. Basta con pedir al agente que recorra `projects/*/publications/*.md` y agrupe el frontmatter como te interese. Las vistas son siempre regenerables desde el frontmatter.
+
 ### API directo / scripts
 
 Pasar el contenido del playbook como system prompt o como instrucción al modelo.

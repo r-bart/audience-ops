@@ -3,7 +3,7 @@ name: audience-ops-weekly
 description: "Ritual semanal del operating system de contenidos: triage del inbox, vista de calendario, hygiene continua. Modo `--cleanup` para limpieza trimestral (archivado de publicadas viejas, drafts abandonados, ideas killed, proyectos paused)."
 metadata:
   author: r-bart
-  version: "0.10.2"
+  version: "0.11.0"
 ---
 
 # weekly — Ritual semanal + cleanup trimestral
@@ -25,7 +25,7 @@ Es la única skill que **escribe estados** masivamente y mueve ficheros a `archi
 
 Antes de actuar, leer:
 
-1. `config.yaml` — umbrales (`stale_draft_days`, `stale_inbox_days`, `cleanup_threshold_days`, `strategy_review_months`, `paused_archive_threshold_months`) y `defaults.project`.
+1. `config.yaml` — umbrales (`stale_draft_days`, `stale_inbox_days`, `cleanup_threshold_days`, `strategy_review_months`, `paused_archive_threshold_months`, `learnings_prompt_threshold_days`), flags (`prompt_learnings_on_publish`) y `defaults.project`.
 2. `portfolio.yaml` — para conocer proyectos activos / pausados / archivados.
 3. Para cada proyecto activo (o el filtrado):
    - `projects/<slug>/ideas/_inbox.md` — entradas con prefijo de fecha.
@@ -120,6 +120,14 @@ Para cada uno, mostrar y preguntar:
 - ¿Lo cancelaste? → cambiar a `status: draft` y limpiar `scheduled_for` (vuelve a la cola de drafts). Si es definitivo, ofrecer abandonar (mover a `archive/abandoned/`, mismo flujo que 3a).
 - ¿Lo reprogramaste? → pedir nueva fecha, actualizar `scheduled_for`.
 
+**Después de confirmar el cambio a `published` (y solo si `prompt_learnings_on_publish: true` en config.yaml, default true)**:
+
+> "¿algo que aprendiste de esta? (puedes saltar)"
+
+Si el usuario aporta bullets, **append** un `## Aprendizajes` al final del cuerpo del fichero de la publicación con esos bullets (texto literal de cada bullet, sin interpretar markdown como headings). Si la sección ya existía (caso raro: aprendizajes añadidos manualmente antes del weekly), agregar bullets al final de la sección existente. Si el usuario salta, no se crea sección.
+
+Si `prompt_learnings_on_publish: false`, el prompt se suprime — el usuario puede añadir aprendizajes a mano editando el fichero o esperar a `weekly --cleanup` (paso 6) para barrido retroactivo.
+
 #### 3c · Inbox stale
 
 Buscar entradas pendientes (sin sufijo) en `_inbox.md` con prefijo de fecha > `stale_inbox_days` (default 30).
@@ -190,6 +198,18 @@ Preguntar: "El proyecto `<slug>` lleva X meses sin actividad. ¿Cambiar status a
 
 En afirmativa, editar la entrada. No mover el directorio `projects/<slug>/` — la "archivación" del proyecto es solo un cambio de status; el contenido sigue accesible.
 
+### Cleanup 6 · Publicaciones sin aprendizajes
+
+Buscar publicaciones con `status: published` cuyo `scheduled_for` es anterior a `hoy - learnings_prompt_threshold_days` (default 60) y que **no tienen** una sección `## Aprendizajes`.
+
+Listar al usuario, agrupadas por proyecto. Para cada una, preguntar: "¿añadir aprendizajes ahora? (skip / dictar bullets / pasar al siguiente)".
+
+- **Dictar bullets** → append `## Aprendizajes` al cuerpo del fichero con los bullets dictados (texto literal, sin interpretar markdown como headings).
+- **Skip** → no se toca. Volverá a salir en el próximo `--cleanup` (su edad sigue creciendo).
+- **Pasar al siguiente** → marcar internamente como "ya preguntada esta vez" y omitir resto del lote.
+
+Este paso es **barrido retroactivo** para publicaciones donde no se capturó aprendizajes en su momento (o porque `prompt_learnings_on_publish` estaba en false, o porque el ritual semanal no se corrió cuando tocaba).
+
 ### Resumen final del cleanup
 
 Mostrar conteos: N publicaciones archivadas, M drafts abandonados, K ideas killed, L revisiones de estrategia sugeridas, P proyectos marcados archived.
@@ -204,6 +224,7 @@ Mostrar conteos: N publicaciones archivadas, M drafts abandonados, K ideas kille
 | `projects/<slug>/publications/archive/<año>/<...>.md` | cleanup | Mover published viejas |
 | `projects/<slug>/ideas/archive/<slug>.md` | cleanup | Mover ideas estructuradas killed |
 | `portfolio.yaml` | cleanup | Cambiar `status` de proyectos pausados a `archived` |
+| `projects/<slug>/publications/<...>.md` | normal o cleanup | Append `## Aprendizajes` section con bullets cuando el usuario los dicta |
 
 ## Criterios de éxito
 

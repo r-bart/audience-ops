@@ -3,7 +3,7 @@ name: audience-ops-init
 description: "Bootstrap del repo Audience Ops (si está vacío) o añade un nuevo proyecto. Encadena la creación de estructura, estrategia, voz y canales en un flujo guiado."
 metadata:
   author: r-bart
-  version: "0.10.2"
+  version: "0.11.0"
 ---
 
 # init — Bootstrap del repo + primer proyecto
@@ -158,12 +158,38 @@ Si el usuario quiere posponer alguna sección, dejarla con `_pendiente_` y avisa
 
 ### Paso 7 · Sub-flujo · Voz y tono
 
+Antes de preguntar, mostrar al usuario los **ejemplos canónicos** (lift directo del SPEC §5 voice.md) etiquetados como "Ejemplo (no obligatorio)" para anclar expectativas. El usuario puede:
+
+- Decir "como el ejemplo" en cualquier sub-sección → el skill escribe el ejemplo verbatim.
+- Refinarlo o reescribirlo a su gusto.
+- Dejarlo en `_pendiente_` y volver más tarde editando `voice.md` a mano.
+
+**Ejemplos canónicos**:
+
+```markdown
+## Atributos
+- directo, técnico, sin hype
+- primera persona honesta
+
+## Sí
+- datos concretos, ejemplos del propio uso, decisiones explicadas
+- digresiones cortas si son honestas
+
+## No
+- jerga marketinera, superlatives
+- listas "10 razones por las que..."
+- preguntas retóricas como hook
+
+## Referencias
+- escribe como [autor X], no como [autor Y]
+```
+
 Preguntar al usuario por:
 
-- **Atributos** (3–5 adjetivos de la voz).
-- **Sí** (3–5 cosas que sí se hacen).
-- **No** (3–5 cosas que no se hacen).
-- **Referencias** (autores/marcas que inspiran la voz, opcional).
+- **Atributos** (3–5 adjetivos de la voz, o di "como el ejemplo").
+- **Sí** (3–5 cosas que sí se hacen, o di "como el ejemplo").
+- **No** (3–5 cosas que no se hacen, o di "como el ejemplo").
+- **Referencias** (autores/marcas que inspiran la voz, opcional, o di "como el ejemplo").
 
 Escribir `projects/<slug>/voice.md`:
 
