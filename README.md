@@ -172,6 +172,23 @@ Answer a short interview: your name, first project, positioning, voice, active c
 - `projects/<slug>/strategy.md`, `voice.md`, `channels/<id>.md` (one per channel).
 - An empty idea inbox ready for capture.
 
+`init` delegates the strategy interview to the `strategy` skill (see next section). Voice and channels are handled inline.
+
+### Refining the strategy · When pillars or ICP shift
+
+```
+/audience-ops-strategy
+```
+
+Re-runs the strategy interview block by block (positioning, audience/ICP, pillars, goals, anti-topics). Two modes:
+
+- **Create** (no `strategy.md` yet, or all sections blank): full interview, all five blocks required.
+- **Update** (existing strategy): for each block, shows the current content and asks *keep / refine / rewrite / skip*. Useful when only one piece changed (e.g., a new pillar).
+
+Always bumps `last_reviewed` to today on save. Warns up front if the existing `last_reviewed` is older than `strategy_review_months` (default 4) — that's also when `weekly --cleanup` will nudge you to re-run it.
+
+This skill **does not touch `voice.md` or channels** — those are separate files with their own lifecycle. Run `init` if you need to add a channel.
+
 ### Day to day · Capture
 
 ```

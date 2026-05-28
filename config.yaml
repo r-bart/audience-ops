@@ -10,8 +10,9 @@ defaults:
   scheduler: typefully      # hint informativo para el handoff ready → published
 
 behavior:
-  inbox_auto_promote: false       # las ideas no se promueven solas
-  cleanup_threshold_days: 90      # umbral para archivar publicaciones publicadas
-  stale_draft_days: 30            # weekly flagea drafts más viejos sin tocar
-  stale_inbox_days: 30            # weekly flagea entradas de inbox más viejas
-  strategy_review_months: 4       # strategy avisa si last_reviewed es más viejo
+  inbox_auto_promote: false              # las ideas no se promueven solas
+  cleanup_threshold_days: 90             # umbral para archivar publicaciones publicadas
+  stale_draft_days: 30                   # weekly flagea drafts más viejos sin tocar
+  stale_inbox_days: 30                   # weekly flagea entradas de inbox más viejas
+  strategy_review_months: 4              # strategy avisa si last_reviewed es más viejo
+  paused_archive_threshold_months: 6     # weekly --cleanup propone archivar proyectos paused tras este tiempo

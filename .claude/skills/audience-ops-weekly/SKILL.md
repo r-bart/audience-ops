@@ -1,9 +1,9 @@
 ---
 name: audience-ops-weekly
-description: Ritual semanal del operating system de contenidos: triage del inbox, vista de calendario, hygiene continua. Modo `--cleanup` para limpieza trimestral (archivado de publicadas viejas, drafts muertos, ideas killed, proyectos paused).
+description: "Ritual semanal del operating system de contenidos: triage del inbox, vista de calendario, hygiene continua. Modo `--cleanup` para limpieza trimestral (archivado de publicadas viejas, drafts abandonados, ideas killed, proyectos paused)."
 metadata:
   author: r-bart
-  version: "0.10.0"
+  version: "0.10.1"
 ---
 
 # weekly — Ritual semanal + cleanup trimestral
@@ -25,7 +25,7 @@ Es la única skill que **escribe estados** masivamente y mueve ficheros a `archi
 
 Antes de actuar, leer:
 
-1. `config.yaml` — umbrales (`stale_draft_days`, `stale_inbox_days`, `cleanup_threshold_days`, `strategy_review_months`) y `defaults.project`.
+1. `config.yaml` — umbrales (`stale_draft_days`, `stale_inbox_days`, `cleanup_threshold_days`, `strategy_review_months`, `paused_archive_threshold_months`) y `defaults.project`.
 2. `portfolio.yaml` — para conocer proyectos activos / pausados / archivados.
 3. Para cada proyecto activo (o el filtrado):
    - `projects/<slug>/ideas/_inbox.md` — entradas con prefijo de fecha.
@@ -41,6 +41,16 @@ Las vistas activas **excluyen siempre cualquier ruta `*/archive/*`**.
 - Con `--cleanup` → modo **cleanup** (trimestral).
 - Si pasan ambos: ejecutar primero normal, luego cleanup.
 
+## Convenciones sobre el inbox
+
+Una línea = una idea (per SPEC §4). El inbox es **append-only y plano**: nunca se introducen headings ni se reordenan líneas. Las líneas se "anotan" con sufijos al final, manteniendo formato y orden originales:
+
+- **Promovida**: `2026-05-19 · texto  → ideas/<slug>.md` (lo añade `audience-ops-idea --promote`).
+- **Killed**: `2026-05-19 · texto  → killed 2026-05-28` (lo añade `weekly` modo normal al triage).
+- **Pendiente** (sin sufijo): candidata a triage en el próximo `weekly`.
+
+Tres sufijos posibles, mutuamente excluyentes. Una línea killed o promovida ya no vuelve a aparecer en triage.
+
 ## Pasos · Modo normal
 
 ### Paso 1 · Triage del inbox
@@ -48,18 +58,18 @@ Las vistas activas **excluyen siempre cualquier ruta `*/archive/*`**.
 Para cada proyecto en alcance:
 
 1. Leer `_inbox.md`.
-2. Identificar entradas **sin sufijo de promoción** (las que no acaban en `→ ideas/<slug>.md`).
-3. Para cada entrada nueva, mostrar al usuario:
+2. Identificar entradas **sin sufijo** (las que no acaban en `→ ideas/...` ni `→ killed YYYY-MM-DD`).
+3. Para cada entrada pendiente, mostrar al usuario:
 
 ```
-[2026-05-28] Hook sobre HRV en zona 1
+[2026-05-21] Hook sobre HRV en zona 1
   → ¿promover, dejar, matar?
 ```
 
 4. Acciones:
    - **promover** → invocar internamente la lógica de `audience-ops-idea --promote` (interview de slug/pilar/canales/hook). Marca la línea con sufijo `→ ideas/<slug>.md`.
-   - **dejar** → no tocar.
-   - **matar** → mover la línea al final del fichero bajo una sección `## Killed YYYY-MM-DD` con la fecha de hoy. No borrar (soft kill).
+   - **dejar** → no tocar. Volverá a salir en el próximo `weekly` con la misma fecha de captura original (no se renueva: la fecha es captura, no revisión).
+   - **matar** → añadir sufijo `→ killed YYYY-MM-DD` (fecha de hoy) a la línea. Soft kill: la línea queda en `_inbox.md` permanentemente como histórico.
 
 Si el usuario quiere triagear en bloque, ofrecer "saltar el resto de hoy" tras la primera entrada.
 
@@ -95,11 +105,11 @@ Tres tipos de aviso, agrupados:
 
 Buscar publicaciones con `status: draft` y `mtime` > `stale_draft_days` (default 30).
 
-Para cada uno, mostrar y preguntar: ¿iterar / abandonar / mantener?
+Para cada uno, mostrar y preguntar: ¿iterar / abandonar / dejar?
 
 - **iterar** → sugerir al usuario invocar `/audience-ops-draft <idea> <channel>` para regenerar.
-- **abandonar** → marcar para el modo `--cleanup` (cambia `status: abandoned`).
-- **mantener** → tocar `mtime` (rewrite del fichero idéntico) para resetear el reloj.
+- **abandonar** → mover el fichero **inmediatamente** a `projects/<slug>/publications/archive/abandoned/<idea-slug>-<channel>.md`, conservando frontmatter y contenido (no se cambia `status`, el path comunica el estado). Acción confirmada antes de mover.
+- **dejar** → no tocar. Volverá a salir el próximo `weekly` (mtime sigue siendo el mismo).
 
 #### 3b · Ready vencidos
 
@@ -107,14 +117,17 @@ Buscar publicaciones con `status: ready` y `scheduled_for < hoy`.
 
 Para cada uno, mostrar y preguntar:
 - ¿Lo publicaste? → cambiar a `status: published` (preserva el `scheduled_for` como fecha efectiva).
-- ¿Lo cancelaste? → cambiar a `status: draft` y limpiar `scheduled_for`, o `status: abandoned` si es definitivo.
+- ¿Lo cancelaste? → cambiar a `status: draft` y limpiar `scheduled_for` (vuelve a la cola de drafts). Si es definitivo, ofrecer abandonar (mover a `archive/abandoned/`, mismo flujo que 3a).
 - ¿Lo reprogramaste? → pedir nueva fecha, actualizar `scheduled_for`.
 
 #### 3c · Inbox stale
 
-Buscar entradas de `_inbox.md` (en cualquier proyecto) con prefijo de fecha > `stale_inbox_days` (default 30) que **no estén promovidas ni killed**.
+Buscar entradas pendientes (sin sufijo) en `_inbox.md` con prefijo de fecha > `stale_inbox_days` (default 30).
 
-Para cada una, preguntar: ¿promover / matar / dejar (renueva fecha al de hoy)?
+Para cada una, preguntar: ¿promover / matar / dejar?
+
+- **promover** y **matar**: mismas acciones que en Paso 1 (sufijo correspondiente).
+- **dejar** → no tocar. La fecha de captura se mantiene (no se renueva). Volverá a salir como stale el próximo weekly hasta que el usuario decida.
 
 ### Paso 4 · Decisiones de drafting
 
@@ -130,7 +143,8 @@ Esto cierra el bucle: las ideas que llevan tiempo estructuradas sin draftearse a
 
 Mostrar al usuario:
 - Entradas del inbox triageadas (promovidas / dejadas / killed).
-- Cambios de estado aplicados (draft→ready resetados, ready→published, etc.).
+- Cambios de estado aplicados (ready → published, ready → draft con reset de `scheduled_for`, reagendados).
+- Drafts movidos a `archive/abandoned/`.
 - Decisiones de drafting tomadas para esta semana.
 - Avisos pendientes que el usuario marcó "dejar" (para que vuelva a ver en el próximo `weekly`).
 
@@ -142,21 +156,23 @@ Cinco acciones, **todas con confirmación**, en este orden:
 
 Buscar `status: published` con `scheduled_for` anterior a `hoy - cleanup_threshold_days` (default 90).
 
-Para cada bloque, mostrar lista resumida y preguntar: "¿archivar las N publicaciones de YYYY?". En afirmativa, mover a `projects/<slug>/publications/archive/<año>/<idea-slug>-<channel>.md`. Mantener nombre de fichero original.
+Para cada bloque por año, mostrar lista resumida y preguntar: "¿archivar las N publicaciones de YYYY?". En afirmativa, mover a `projects/<slug>/publications/archive/<año>/<idea-slug>-<channel>.md`. Mantener nombre de fichero original.
 
-### Cleanup 2 · Drafts abandonados
+### Cleanup 2 · Drafts muy viejos no revisados
 
-Buscar publicaciones con `status: abandoned` (puesto durante hygiene del modo normal) o `status: draft` con `mtime` muy viejo (> 2 × `stale_draft_days`).
+Drafts en estado `status: draft` con `mtime` > 2 × `stale_draft_days` (default 60). Son drafts que el usuario llevaba ignorando incluso en weeklies (no los abandonó, pero tampoco iteró).
 
-Mover a `projects/<slug>/publications/archive/abandoned/<idea-slug>-<channel>.md`.
+Mostrar lista y para cada uno preguntar: ¿iterar / abandonar (mover a `archive/abandoned/`) / dejar?
 
-### Cleanup 3 · Ideas killed
+Misma mecánica que hygiene 3a, sólo que el umbral es más agresivo y se ejecuta como barrido trimestral.
 
-Buscar ideas estructuradas que ya no tienen ninguna publicación viva (todas sus publicaciones están en `archive/abandoned/` o fueron eliminadas).
+### Cleanup 3 · Ideas estructuradas killed
+
+Buscar ideas estructuradas (`projects/<slug>/ideas/<slug>.md`) que ya no tienen ninguna publicación viva (todas sus publicaciones referenciadas en `channels:` del frontmatter están en `archive/abandoned/` o nunca existieron y la idea lleva > `stale_inbox_days` sin actividad).
 
 Preguntar al usuario por cada una: ¿archivar? En afirmativa, mover `projects/<slug>/ideas/<slug>.md` a `projects/<slug>/ideas/archive/`.
 
-Adicionalmente: entradas de `_inbox.md` bajo `## Killed YYYY-MM-DD` → moverlas a un fichero `projects/<slug>/ideas/archive/_inbox-killed.md` (append) y limpiar la sección Killed del inbox.
+**El `_inbox.md` no se toca en cleanup**: las líneas killed (con sufijo `→ killed YYYY-MM-DD`) viven indefinidamente en `_inbox.md` como histórico permanente, sin coste — son una línea cada una y aportan trazabilidad de qué descartaste y cuándo.
 
 ### Cleanup 4 · Revisión de estrategia
 
@@ -168,9 +184,9 @@ No archivar nada — la estrategia no se "cumple", se refresca.
 
 ### Cleanup 5 · Proyectos pausados
 
-Recorrer `portfolio.yaml`. Para proyectos con `status: paused` cuya última publicación (cualquier estado, mirando todas las publicaciones del proyecto) sea > 6 meses atrás:
+Recorrer `portfolio.yaml`. Para proyectos con `status: paused` cuya última publicación (cualquier estado, mirando todas las publicaciones del proyecto incluido `archive/`) sea anterior a `hoy - paused_archive_threshold_months` meses (default 6):
 
-Preguntar: "El proyecto `<slug>` lleva mucho sin actividad. ¿Cambiar status a `archived` en `portfolio.yaml`?".
+Preguntar: "El proyecto `<slug>` lleva X meses sin actividad. ¿Cambiar status a `archived` en `portfolio.yaml`?".
 
 En afirmativa, editar la entrada. No mover el directorio `projects/<slug>/` — la "archivación" del proyecto es solo un cambio de status; el contenido sigue accesible.
 
@@ -182,12 +198,11 @@ Mostrar conteos: N publicaciones archivadas, M drafts abandonados, K ideas kille
 
 | Fichero | Modo | Acción |
 |---|---|---|
-| `projects/<slug>/ideas/_inbox.md` | normal | Marcar líneas promovidas (sufijo) o killed (mover a sección) |
+| `projects/<slug>/ideas/_inbox.md` | normal | Sufijar líneas: `→ ideas/<slug>.md` (promovidas) o `→ killed YYYY-MM-DD` (killed) |
 | `projects/<slug>/publications/<...>.md` | normal | Cambios de `status` y `scheduled_for` en frontmatter |
-| `projects/<slug>/publications/archive/<año>/<...>.md` | cleanup | Mover desde publications/ |
-| `projects/<slug>/publications/archive/abandoned/<...>.md` | cleanup | Mover desde publications/ |
-| `projects/<slug>/ideas/archive/<slug>.md` | cleanup | Mover desde ideas/ |
-| `projects/<slug>/ideas/archive/_inbox-killed.md` | cleanup | Append líneas killed del inbox |
+| `projects/<slug>/publications/archive/abandoned/<...>.md` | normal o cleanup | Mover desde `publications/` (al abandonar drafts) |
+| `projects/<slug>/publications/archive/<año>/<...>.md` | cleanup | Mover published viejas |
+| `projects/<slug>/ideas/archive/<slug>.md` | cleanup | Mover ideas estructuradas killed |
 | `portfolio.yaml` | cleanup | Cambiar `status` de proyectos pausados a `archived` |
 
 ## Criterios de éxito
@@ -195,32 +210,33 @@ Mostrar conteos: N publicaciones archivadas, M drafts abandonados, K ideas kille
 ### Modo normal
 - Toda entrada del inbox sin sufijo se mostró al usuario para decisión.
 - Las publicaciones con `scheduled_for` pasado en estado `ready` se reconciliaron (published, draft, reagendado, o explícitamente dejado).
-- Los drafts > `stale_draft_days` se mostraron al usuario.
+- Los drafts > `stale_draft_days` se mostraron al usuario; los abandonados se movieron a `archive/abandoned/` con confirmación.
 - Se rindió un calendario coherente con los `scheduled_for` actuales.
 
 ### Modo cleanup
-- Toda publicación con `scheduled_for > cleanup_threshold_days` en pasado y `status: published` se movió a `archive/<año>/` (o quedó tras decisión explícita del usuario de no archivar).
-- Toda publicación marcada `abandoned` se movió a `archive/abandoned/`.
-- Toda idea sin publicaciones vivas se evaluó para archivado.
-- Toda strategy stale se reportó.
+- Toda publicación con `scheduled_for > cleanup_threshold_days` en pasado y `status: published` se evaluó (archivada o dejada por decisión explícita).
+- Los drafts ultra-viejos (> 2 × `stale_draft_days`) se evaluaron.
+- Las ideas estructuradas sin publicaciones vivas se evaluaron para archivado.
+- Las strategy stale se reportaron.
 - `portfolio.yaml` refleja las decisiones tomadas sobre proyectos pausados.
 
 ## Errores y casos límite
 
 - **No hay proyectos** en `portfolio.yaml`: avisar, sugerir `/audience-ops-init`.
 - **Una publicación tiene frontmatter inválido** (yaml roto, `status` desconocido): mostrar al usuario el fichero, no intentar reparar; tratarla como "skipped" en este ritual.
-- **`config.yaml` sin umbrales**: usar los defaults documentados aquí (30 / 30 / 90 / 4) y avisar al usuario una vez ("usando defaults; ajústalos en `config.yaml` si quieres").
+- **`config.yaml` sin umbrales**: usar los defaults documentados aquí (30 / 30 / 90 / 4 / 6) y avisar al usuario una vez ("usando defaults; ajústalos en `config.yaml` si quieres").
 - **Conflicto de slot** (dos publicaciones mismo canal misma fecha): avisar, no resolver automáticamente — el usuario decide cuál mueve.
 - **El usuario corta el ritual a mitad**: los cambios ya confirmados quedan aplicados. Lo no triageado vuelve a aparecer la próxima vez. Cero estado intermedio.
 - **`archive/` ya existe con estructura distinta** (ej. fichero llamado `archive` en lugar de carpeta): avisar, no sobreescribir.
-- **Cambio de `status` de una publicación que no tiene `scheduled_for`** (p.ej. `draft` que nunca se programó pero está stale): permitir `abandoned` directamente sin pedir fecha.
 - **Inbox sin prefijo de fecha** en alguna línea: no asumir staleness; mostrar al usuario para que aclare.
+- **Línea del inbox con sufijo desconocido** (ej. usuario lo editó a mano): no asumir; mostrar al usuario.
 
 ## Principios que aplica
 
 - **Cero magia.** Nada se mueve, archiva ni cambia de status sin confirmación explícita.
-- **Soft archive, never delete.** Todo lo que se "quita" se mueve a `archive/` en la jerarquía adecuada. Reversible con un `git mv` o un `weekly` futuro que lo desempolve.
+- **Soft archive, never delete.** Todo lo que se "quita" se mueve a un directorio `archive/` en la jerarquía adecuada. Reversible con un `git mv`.
 - **Vistas regenerables.** El calendario, los conteos de cadencia y los avisos de hygiene se computan al vuelo desde los ficheros — no hay caché ni índice.
-- **Una sola fuente de verdad por cosa.** El estado vive en frontmatter; el archivado vive en path. Las dos cosas son ortogonales: archivar no cambia `status: published`, solo lo saca de las vistas activas.
+- **Una sola fuente de verdad por cosa.** El estado vive en frontmatter de publicaciones; el "abandono" vive en path (`archive/abandoned/`), no en un cuarto estado fantasma. Las decisiones del inbox viven en sufijos de línea, no en headings ni en ficheros separados.
+- **Append-only en el inbox.** Las líneas nunca se eliminan, sólo se anotan con sufijos. El histórico de qué killed y cuándo es trazable forever.
 - **El proyecto se deriva del path.** Las vistas globales agregan, no duplican slug en frontmatter de publicaciones.
 - **Convención sobre configuración.** Los umbrales tienen defaults razonables; `config.yaml` solo cambia lo que el usuario quiera distinto.

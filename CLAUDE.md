@@ -36,26 +36,48 @@ Three locations, kept in sync on every release:
 # 1. Decide the next version (patch/minor/major per the table above).
 NEXT="vX.Y.Z"
 
-# 2. Bump metadata.version in the 3 SKILL.md (4 once strategy ships, 5 once weekly ships).
+# 2. Bump metadata.version in every SKILL.md.
 #    Use awk/sed when Edit is blocked by the self-mod classifier:
 for f in .claude/skills/audience-ops-*/SKILL.md; do
   sed -i.bak "s/^  version: \".*\"/  version: \"${NEXT#v}\"/" "$f" && rm "$f.bak"
 done
 
-# 3. Commit with a release-style message.
+# 3. VALIDATE YAML in every SKILL.md before tagging. A frontmatter that
+#    doesn't parse silently disappears from `npx skills add` (parseSkillMd
+#    returns null), shipping a "phantom" skill. Block the release if any
+#    file fails:
+for f in .claude/skills/audience-ops-*/SKILL.md; do
+  ruby -ryaml -e "
+    content = File.read('$f')
+    fm = content.match(/\A---\n(.*?)\n---/m) or abort('$f: no frontmatter')
+    YAML.load(fm[1])
+  " || { echo "ABORT: $f frontmatter invalid"; exit 1; }
+done
+
+# 4. Commit with a release-style message.
 git add .claude/skills/ && git commit -m "chore: bump to $NEXT"
 
-# 4. Tag the commit (annotated).
+# 5. Tag the commit (annotated).
 git tag -a "$NEXT" -m "<one-line description of what ships>"
 
-# 5. Push main + tag.
+# 6. Push main + tag.
 git push origin main "$NEXT"
 
-# 6. Create the GitHub Release (notes can be expanded later).
+# 7. Create the GitHub Release (notes can be expanded later).
 gh release create "$NEXT" \
   --title "$NEXT — <theme>" \
   --notes "<bullet list of what changed, what's still pending, install command>"
 ```
+
+### YAML gotcha — quote descriptions
+
+The CLI's `parseSkillMd` silently drops skills whose frontmatter fails to parse. The most common cause is an unquoted `:` inside the `description` field. **Always quote the description**:
+
+```yaml
+description: "Text with a colon: parses fine because it's quoted."
+```
+
+Don't write `description: Text with a colon:` — YAML interprets that as a nested mapping and the whole frontmatter fails.
 
 ### What invalidates a published version
 

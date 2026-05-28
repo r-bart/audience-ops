@@ -1,9 +1,9 @@
 ---
 name: audience-ops-strategy
-description: Interview para crear o actualizar el `strategy.md` de un proyecto (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado.
+description: "Interview para crear o actualizar el `strategy.md` de un proyecto (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
 metadata:
   author: r-bart
-  version: "0.10.0"
+  version: "0.10.1"
 ---
 
 # strategy — Crear o actualizar la estrategia de un proyecto
@@ -202,4 +202,4 @@ Mostrar al usuario:
 - **Una sola fuente de verdad por cosa.** Los pilares viven en el frontmatter de `strategy.md` (canónico) + descripción en el cuerpo. Las ideas referencian por slug.
 - **Frontmatter mínimo.** Solo `slug`, `pillars`, `last_reviewed`. El resto en prosa con H2s.
 - **El proyecto se deriva del path.** El fichero acaba en `projects/<slug>/`, no se duplica.
-- **Soft archive desde el inicio.** Si el usuario pide "olvidar" la estrategia entera (poco común), mover a `projects/<slug>/strategy.archived-YYYY-MM-DD.md` en lugar de borrar.
+- **Soft archive desde el inicio.** Si el usuario pide "olvidar" la estrategia entera (poco común), mover a `projects/<slug>/archive/strategy-YYYY-MM-DD.md` siguiendo la convención `archive/` del repo, en lugar de borrar o renombrar adyacente.
