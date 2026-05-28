@@ -12,8 +12,8 @@ Las skills se descubren automáticamente desde `.claude/skills/<slug>/SKILL.md`.
 /audience-ops-init
 /audience-ops-idea "hook sobre HRV en zona 1"
 /audience-ops-draft cardio-rmssd newsletter
-/audience-ops-strategy
-/audience-ops-weekly
+/audience-ops-strategy   # pendiente (Fase 5)
+/audience-ops-weekly     # pendiente (Fase 6)
 ```
 
 ### Otros agentes (Cursor, Aider, Codex, etc.)

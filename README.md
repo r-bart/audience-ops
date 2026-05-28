@@ -136,6 +136,16 @@ All with confirmation. Zero automatic archiving.
 
 ### Install
 
+Two paths:
+
+**Via [skills.sh](https://skills.sh)** (Claude Code, Cursor, Codex, and 50+ agents supported):
+
+```bash
+npx skills add r-bart/audience-ops
+```
+
+**Or clone the template directly**:
+
 ```bash
 git clone https://github.com/r-bart/audience-ops.git
 cd audience-ops
@@ -245,7 +255,7 @@ Ideas that don't make the MVP but could land if real usage justifies them:
 
 - **Lightweight CLI** (`co`) for terminal capture without invoking an agent.
 - **Structure validation / linting** (`co lint`).
-- **Distributable Claude Code plugin** so users don't have to clone the template.
+- **Wider distribution** — already installable via [skills.sh](https://skills.sh) across 50+ agents; a native Claude Code plugin wrapper could come if usage justifies it.
 - **Scheduler-specific outputs** — variants per scheduler (Typefully, Buffer) on top of per-channel.
 - **Per-project assets** (`assets/`) for screenshots and diagrams referenced from publications.
 
@@ -261,4 +271,4 @@ This is a personal project under construction. If the model resonates and you wa
 
 ## License
 
-To be defined.
+MIT — see [`LICENSE`](./LICENSE).

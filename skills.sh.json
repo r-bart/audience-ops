@@ -1,0 +1,15 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Audience Ops",
+      "description": "Content operating system for indie hackers. Filesystem-first, agent-agnostic, multi-project, multi-channel.",
+      "skills": [
+        "audience-ops-init",
+        "audience-ops-idea",
+        "audience-ops-draft"
+      ]
+    }
+  ]
+}
