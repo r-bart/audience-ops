@@ -115,6 +115,8 @@ When you edit a playbook, you're editing the deliverable. Treat it like code.
 
 **Sobre la numeración v0.12.0 → v0.2.0**: v0.12.0 fue tagueada brevemente con el refactor single-instance, pero el numbering 0.12 era inflado para algo aún sin validar via dogfooding. v0.2.0 renormalizada al estado real del proyecto (pre-MVP-validado). v0.12.0 sigue existiendo como tag histórico pero v0.2.0 es la versión canónica del single-instance model.
 
+**v0.3.0+ adds optional `audience-ops/projects/<slug>.md` dossiers** — per-project context (qué es, audiencia, story log, ángulos abiertos) consumed by `draft` when an idea-slug matches a dossier's `slug_prefix`. Instances without dossiers operate identically to v0.2.0. The dossier directory shares its name with the legacy v0.11.x `projects/<slug>/` (now killed) but has entirely different semantics — see SPEC §4 "Aviso de naming".
+
 ---
 
 ## Branching

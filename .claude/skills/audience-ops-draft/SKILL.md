@@ -3,7 +3,7 @@ name: audience-ops-draft
 description: "Convierte una idea estructurada en un draft listo para un canal concreto. Aplica voz, formato del canal y ángulo de la idea. Soporta repurpose de una publicación existente a otro canal."
 metadata:
   author: r-bart
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # draft — Idea + canal → publicación
@@ -22,6 +22,21 @@ metadata:
 El "proyecto" es implícitamente la instancia local (`./audience-ops/`). No hay slug ni selección.
 
 ## Lectura previa
+
+### Paso previo · Dossier de proyecto (v0.3.0+, si aplica)
+
+Antes del resto de lecturas:
+
+1. Listar `audience-ops/projects/*.md` (excluir `archive/`). Si el directorio no existe, omitir todo este paso previo.
+2. Para cada dossier encontrado, parsear su frontmatter y construir un mapa `slug_prefix: <dossier-path>`.
+3. Extraer el prefix del `idea-slug` partiendo por el primer `-`. Si la idea es `bl-cloudflare-migration`, el prefix candidato es `bl`.
+4. Si el prefix matchea exactamente un dossier en el mapa, marcar ese dossier para inclusión.
+5. Si el prefix matchea **2+ dossiers** (colisión rara por edit manual): warning al usuario ("Found 2 dossiers with prefix `bl`: …"), usar el primer match alfabéticamente.
+6. Si el prefix no matchea ningún dossier (incluyendo el caso de idea-slug sin `-`): seguir adelante sin dossier, sin warning.
+
+Si un dossier matcheado tiene frontmatter inválido (YAML roto): warning y omitir ese dossier; no bloquear el resto del draft.
+
+### Lecturas estándar
 
 Antes de generar nada, leer:
 
@@ -48,6 +63,7 @@ Si **alguna** de las tres primeras lecturas falla, abortar con mensaje claro al 
 
 Construir el contexto de generación con:
 
+- **Project dossier** (si fue matcheado en el paso previo): contenido completo de `audience-ops/projects/<project-slug>.md`. Úsalo para referencias factuales del producto (stack, audiencia, story log, ángulos abiertos). **El ángulo de la idea y el formato del canal mantienen prioridad** cuando hay conflicto — el dossier informa, no dicta.
 - **Voz base**: contenido de `voice.md`.
 - **Ajustes de voz del canal**: sección `## Ajustes de voz` de `channels/<channel>.md`, si existe. Estos overridean la voz base.
 - **Formato del canal**: sección `## Formato` de `channels/<channel>.md`.
@@ -196,6 +212,10 @@ Tras el batch, renderizar tabla:
 - **Newsletter sin generar `subject` válido** (>50 chars): no marcar `ready`. Pedir al usuario que afine o regenerar.
 - **Repurpose desde un canal muy distinto** (ej. newsletter → X): si la longitud no entra, ofrecer dividir en varias publicaciones (no asumir).
 - **El draft generado contiene "anti-temas"** listados en `strategy.md`: detectar y avisar antes de escribir.
+- **Prefix de idea-slug no matchea ningún dossier**: proceder sin dossier, sin warning. La convención de prefix es opcional.
+- **Prefix colisiona con 2+ dossiers**: warning + usar el primero alfabéticamente.
+- **Dossier con frontmatter YAML inválido**: warning + omitir ese dossier de la composición de contexto; no bloquear el draft.
+- **`audience-ops/projects/` no existe**: comportamiento idéntico a v0.2.0 (no dossiers, no warnings, paso previo se omite entero).
 - **Modo `--to` sin `--from`**: error con mensaje "`--to` requiere `--from <publication-path>`. Para draftear una idea a varios canales desde cero, invoca `draft <idea> <channel>` una vez por canal." No generar nada.
 - **Modo `--to` con canal inexistente**: pre-flight aborta listando todos los canales faltantes. No se genera nada.
 - **Modo `--to` con un solo canal**: behavior idéntico a modo single-channel `--from`; el flag se acepta por simetría.

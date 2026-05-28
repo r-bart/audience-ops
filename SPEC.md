@@ -76,6 +76,9 @@
     │   ├── _inbox.md                     ← captura rápida, append-only, líneas con fecha
     │   ├── <slug>.md                     ← idea formalizada
     │   └── archive/                      ← ideas killed o abandonadas
+    ├── projects/                         ← (v0.3.0+) dossiers por proyecto, opcional
+    │   ├── <project-slug>.md             ← contexto, story log, ángulos abiertos
+    │   └── archive/                      ← dossiers de proyectos retirados (git mv manual)
     └── publications/
         ├── <idea-slug>-<channel>.md
         └── archive/
@@ -90,6 +93,10 @@ El **repo de la herramienta** (este repo, `r-bart/audience-ops`) tiene su propio
 - Filenames de publicaciones: `<idea-slug>-<channel>.md`. Sin prefijo de fecha (sort por frontmatter `scheduled_for`).
 - Backlinks entre ideas: `[[idea-slug]]` en el cuerpo del markdown. Sin frontmatter, sin esquema.
 - Las entradas del `_inbox.md` empiezan con `YYYY-MM-DD ·` para que `weekly` detecte staleness.
+
+**Slug-prefix en ideas (v0.3.0+, opcional)**: las ideas pueden prefijarse con `<prefix>-` para vincularse a un proyecto declarado en `audience-ops/projects/<slug>.md` (ej. `bl-cloudflare-migration` se vincula al dossier con `slug_prefix: bl`). Convención opcional, no validada por las skills. Cuando aplica, `draft` lee el dossier automáticamente como contexto adicional.
+
+> **Aviso de naming**: este `projects/` (v0.3.0+) **no es** el legacy `projects/<slug>/` de pre-v0.2.0. Es un directorio de dossiers (un fichero markdown por proyecto), no una jerarquía de instancias. Si vienes de v0.11.x y ves `projects/<slug>/strategy.md`, es layout legacy — ver release notes de v0.2.0 para migración.
 
 **El "proyecto" es implícitamente el repo host.** El identificador del proyecto, cuando se necesita en outputs (calendario, prompts, confirmaciones), se deriva del nombre del directorio raíz del repo (`basename(<repo-root>)`). No hay slug, no hay `name:` configurable. Multi-proyecto se logra teniendo el tool instalado en varios repos.
 
@@ -301,6 +308,52 @@ Reglas:
 - **Lo leen**: `weekly` (para hygiene retroactiva en cleanup) y `strategy` (para surface y posible iteración de pilares en modo update).
 - **No es analítica**: aprendizajes son cualitativos. Engagement / open-rate / subscribers siguen out-of-scope per §2.
 
+### `audience-ops/projects/<project-slug>.md` (opcional, dossier por proyecto, v0.3.0+)
+
+Dossier per-proyecto. Captura contexto (qué es, audiencia), historial publicable (story log) y material maduro a transformar en ideas estructuradas (ángulos abiertos). Solo el campo `slug_prefix:` del frontmatter es parseado por skills — el resto es convención humana.
+
+```markdown
+---
+name: Brakinglab                          # display name
+slug_prefix: bl                           # 2-3 chars; vincula ideas `bl-*` a este dossier
+url: https://brakinglab.com               # opcional
+stack: [astro, cloudflare-workers, d1]    # opcional, free-form
+status: monetized                         # opcional: building | monetized | paused | archived | ...
+last_updated: 2026-05-28                  # opcional, manual
+---
+
+## Qué es
+
+Una frase clara de qué es el proyecto.
+
+## Audiencia
+
+Quién se beneficia, casos de uso reales.
+
+## Story log
+
+<!-- Reverse-chronological. Una línea por evento publicable. -->
+
+- 2026-05-30 · Decisión: pasé de Vercel a Cloudflare Workers. $48 → $5/mo, p95 -60ms.
+- 2026-05-20 · Métrica: primer cliente de pago. €Y MRR.
+- 2026-05-12 · Bug raro: hidratación de Astro rompía en Safari iOS por …
+
+## Ángulos abiertos
+
+<!-- Material del story log que podría madurar a idea estructurada. -->
+
+- [ ] Justificar Cloudflare vs Vercel con números → `behind-the-build`
+- [ ] Por qué Astro encaja mejor que Next aquí → `design-engineering`
+```
+
+Reglas:
+- **Solo `slug_prefix:` se parsea** por las skills. El resto del frontmatter (name, url, stack, status, last_updated) es para humanos.
+- **El directorio `audience-ops/projects/` es opcional**. Una instancia sin dossiers funciona idéntica a v0.2.0.
+- **Filename libre** (kebab-case sugerido, ej. `brakinglab.md`). El skill no infiere prefix desde el filename — usa el campo `slug_prefix:`.
+- **Vinculación**: una idea con slug `bl-foo` se vincula al dossier que declara `slug_prefix: bl`. Ideas sin prefix conocido → ningún dossier se lee, draft procede como antes.
+- **Manual edit**: el writer mantiene story log + ángulos abiertos a mano. Ningún skill escribe en estas secciones automáticamente.
+- **Lo leen**: `draft` (para incluir contexto en la generación cuando hay match).
+
 ---
 
 ## 6. Skills MVP (5)
@@ -312,7 +365,7 @@ Todas las rutas son relativas a la instancia (`<repo-host>/audience-ops/`).
 | `init` | Bootstrap de una instancia (crea `audience-ops/` con strategy + voice + canales + inbox vacío) | — | toda la estructura `audience-ops/` |
 | `strategy` | Interview para crear/actualizar `strategy.md`. Avisa si `last_reviewed` pasa del umbral. En modo update, lee aprendizajes por pilar para sugerir iteración | `audience-ops/strategy.md`, `audience-ops/publications/*.md` (aprendizajes) | `audience-ops/strategy.md` |
 | `idea` | Dos modos: captura rápida al `_inbox` con prefijo de fecha; o promoción a idea estructurada (slug, pilar, canales, ángulo) | `audience-ops/strategy.md` (pilares), `audience-ops/ideas/_inbox.md` | `audience-ops/ideas/_inbox.md`, `audience-ops/ideas/<slug>.md` |
-| `draft` | Idea + canal → draft en `audience-ops/publications/`. Modos `--from` (repurpose) y `--to` (batch a N canales). Incluye revisión final antes de marcar `ready` | `audience-ops/voice.md`, `audience-ops/channels/<id>.md`, idea (idea-slug obligatorio; anchor para repurpose), publicación existente (si repurpose) | `audience-ops/publications/<...>.md` |
+| `draft` | Idea + canal → draft en `audience-ops/publications/`. Modos `--from` (repurpose) y `--to` (batch a N canales). Incluye revisión final antes de marcar `ready` | `audience-ops/voice.md`, `audience-ops/channels/<id>.md`, idea (idea-slug obligatorio; anchor para repurpose), publicación existente (si repurpose), + dossier de proyecto si el slug de la idea tiene prefix conocido (`audience-ops/projects/<slug>.md`) | `audience-ops/publications/<...>.md` |
 | `weekly` | Ritual de la instancia local: triage del inbox, vista de calendario, qué promover a draft, hygiene continua. Modo `--cleanup` para limpieza trimestral | todo en `audience-ops/` | mueve estados en frontmatter, archiva |
 
 ### Detalle de `weekly` (la skill más cargada)
@@ -446,6 +499,14 @@ Cómo entra cada motor en el sistema:
 - `portfolio.yaml` y `projects/<slug>/` desaparecen del modelo.
 - Multi-proyecto se logra teniendo el tool instalado en varios repos.
 - Cross-instance features (calendario global, repurpose cross-project) están explícitamente fuera; se retomarán si dogfooding las pide.
+
+**v0.3.0**:
+
+- Nueva entidad opcional: `audience-ops/projects/<slug>.md` (dossier por proyecto con story log + ángulos abiertos).
+- Convención documentada de slug-prefix en ideas para vincular con dossier (`bl-foo` → dossier con `slug_prefix: bl`).
+- `init` extiende sub-flujo opcional de proyectos + modo `--add-project` para añadir después.
+- `draft` lee el dossier automáticamente cuando el prefix de la idea matchea.
+- Backwards compatible: instancias v0.2.0 sin dossiers operan idéntico.
 
 **Pendiente**:
 

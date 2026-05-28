@@ -3,7 +3,7 @@ name: audience-ops-init
 description: "Inicializa una instancia de Audience Ops en el directorio actual creando una carpeta `audience-ops/` con la estructura completa (strategy, voice, channels, ideas, publications). Una instancia por repo."
 metadata:
   author: r-bart
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # init — Bootstrap de una instancia de Audience Ops
@@ -23,7 +23,9 @@ Una instancia por repo. Si necesitas operar varios proyectos en paralelo, instal
 
 Antes de actuar, leer:
 
-1. `./audience-ops/config.yaml` — si existe ya, ABORT con mensaje: "audience-ops/ ya está inicializado en este directorio. Para editar, modifica los ficheros directamente. Para empezar de cero, `rm -rf audience-ops/` antes de re-invocar."
+1. `./audience-ops/config.yaml` — comportamiento depende de la invocación:
+   - **Sin flag**: si existe ya, ABORT con mensaje: "audience-ops/ ya está inicializado en este directorio. Para editar, modifica los ficheros directamente. Para empezar de cero, `rm -rf audience-ops/` antes de re-invocar. Para añadir proyectos a la instancia existente, invoca con `--add-project`."
+   - **Con `--add-project`**: si existe ya, entrar en sub-modo add-project (saltar todos los pasos excepto el nuevo Paso 7 · Proyectos y el resumen final). Si NO existe ya, error con mensaje: "No hay instancia de audience-ops en este directorio. Ejecuta `/audience-ops-init` sin flags primero."
 2. `./portfolio.yaml`, `./projects/` — si existen (residuos del modelo pre-single-instance): avisar al usuario una vez ("detectado layout legacy; ver release notes de v0.2.0 para migración manual") y continuar con la creación de `audience-ops/` en paralelo.
 
 ## Pasos
@@ -217,16 +219,78 @@ Eliminar `audience-ops/channels/.gitkeep` si se creó al menos un canal.
 
 Si el `id` no está en la lista, dejar la sección `## Formato` con un placeholder y avisar al usuario que la complete.
 
-### Paso 7 · Resumen final
+### Paso 7 · Sub-flujo · Proyectos (opcional, v0.3.0+)
+
+Si la instancia va a alojar contenido para varios productos (o uno solo con dossier explícito), declarar proyectos aquí crea los scaffolds en `audience-ops/projects/`. Estos dossiers son **opcionales** — saltarlos no rompe nada; pueden añadirse después con `/audience-ops-init --add-project`.
+
+Preguntar al usuario:
+
+> "¿Quieres declarar proyectos ahora? Útil si vas a usar esta instancia para varios productos (ej. brakinglab, verxion, blog personal). Saltable; añadibles después con `--add-project`."
+
+Si **declina**: omitir el paso. No crear `audience-ops/projects/`.
+
+Si **acepta**, para cada proyecto que el usuario nombre, preguntar (con sugerencias):
+
+- **Name**: nombre humano (ej. "Brakinglab").
+- **Slug prefix**: 2–3 chars que prefijaran los slugs de ideas vinculadas. Sugerir derivado del nombre (`Brakinglab` → `bl`; `Verxion` → `vx`; `Audience Ops` → `aop`). Validar único contra dossiers ya creados en esta invocación. Si colisiona, pedir alternativa.
+- **URL** (opcional): URL principal del proyecto.
+- **Descripción corta** (opcional): una frase que va al `## Qué es`. Si no, dejarlo vacío.
+
+Crear `audience-ops/projects/<name-kebab-case>.md` por cada proyecto:
+
+```markdown
+---
+name: <name>
+slug_prefix: <prefix>
+url: <url>                              # omitir si no se dio
+status: building                        # default — el usuario lo edita después
+last_updated: <YYYY-MM-DD de hoy>
+---
+
+## Qué es
+
+<descripción si se dio; vacío si no>
+
+## Audiencia
+
+<!-- Quién se beneficia, casos de uso reales. Rellénalo cuando lo tengas claro. -->
+
+## Story log
+
+<!-- Reverse-chronological. Una línea por evento publicable (decisión, métrica, bug, conversación). -->
+
+## Ángulos abiertos
+
+<!-- Material del story log que podría madurar a idea estructurada. -->
+```
+
+Continuar preguntando "¿otro proyecto?" hasta que el usuario diga no.
+
+Si **se está en modo `--add-project`** (instancia existente), tras crear los nuevos dossiers, saltar directo al Paso 8 (Resumen final) y reportar solo los dossiers añadidos esta sesión.
+
+**Edge cases del Paso 7**:
+- `audience-ops/projects/` ya existe con ficheros (puede pasar en `--add-project`): leer los `slug_prefix:` ya declarados y validar que los nuevos no colisionen.
+- Slug-prefix sugerido colisiona con uno existente: pedir alternativa, sugerir con un sufijo numérico (`bl2`, `bl3`) o sufijo letra (`bla`).
+- Nombre de proyecto en kebab-case colisiona con un fichero existente en `audience-ops/projects/`: pedir desambiguación (`brakinglab-v2.md`, etc.).
+- Usuario interrumpe a mitad de declarar el N-ésimo proyecto: los dossiers ya escritos quedan; los pendientes se omiten.
+
+### Paso 8 · Resumen final
 
 Mostrar al usuario:
 
 - Resumen de lo creado: estructura de `audience-ops/`, canales registrados.
 - El "proyecto" del repo es `<basename(CWD)>`.
+- Si se declararon proyectos en Paso 7: lista de dossiers creados con sus `slug_prefix`. Ej.:
+  - `audience-ops/projects/brakinglab.md` (prefix `bl`)
+  - `audience-ops/projects/verxion.md` (prefix `vx`)
+- Para los dossiers: rellenar `## Qué es` y `## Audiencia` a mano cuando tengas un momento; alimentar `## Story log` cuando pasen cosas publicables (decisiones, métricas, bugs).
+- Para añadir un proyecto después: `/audience-ops-init --add-project`.
 - Siguientes pasos:
   - "Captura tu primera idea: `/audience-ops-idea \"<texto>\"`".
   - "Cuando tengas 3-5 ideas, genera un primer draft: `/audience-ops-draft <idea-slug> <channel>`".
   - "Revisa la estrategia en cualquier momento: `/audience-ops-strategy`".
+
+En **modo `--add-project`**, el resumen lista solo los dossiers nuevos creados esta sesión (no la instancia entera).
 
 ## Escritura · Ficheros creados o modificados
 
@@ -238,6 +302,7 @@ Mostrar al usuario:
 | `./audience-ops/channels/<id>.md` | Crear uno por canal |
 | `./audience-ops/ideas/_inbox.md` | Crear con cabecera |
 | `./audience-ops/publications/.gitkeep` | Crear |
+| `./audience-ops/projects/<project-slug>.md` | Crear uno por proyecto declarado (opcional, Paso 7) |
 
 ## Criterios de éxito
 
@@ -247,6 +312,8 @@ Mostrar al usuario:
 - El usuario confirmó cada paso de escritura.
 - `portfolio.yaml` no fue creado (no existe).
 - `projects/<slug>/` no fue creado.
+- Si se declararon proyectos en Paso 7, los dossiers existen en `audience-ops/projects/` con frontmatter completo (`name`, `slug_prefix`, `last_updated`) y las 4 secciones canónicas.
+- En modo `--add-project`: solo se crearon los dossiers nuevos; el resto de la instancia quedó intacta.
 
 ## Errores y casos límite
 
@@ -255,6 +322,9 @@ Mostrar al usuario:
 - **Usuario interrumpe a mitad** (por ejemplo, tras crear estructura pero antes de canales): dejar lo creado, avisar de qué falta, sugerir reanudar invocando `init` (que detectará `audience-ops/` parcial y abortará — el usuario completa a mano).
 - **Channel `id` desconocido**: aceptar, placeholder en formato + warning.
 - **Usuario no quiere voz aún**: crear `voice.md` con secciones marcadas `_pendiente_`.
+- **`--add-project` invocado sin instancia existente**: error con mensaje "no audience-ops/ found; run `/audience-ops-init` first".
+- **Slug-prefix colisiona** con dossier existente: re-prompt al usuario con sugerencia (`bl2`, `bla`, etc.).
+- **Project name (kebab-case) colisiona** con dossier existente: pedir disambiguation (`brakinglab-v2`, etc.).
 
 ## Principios que aplica
 

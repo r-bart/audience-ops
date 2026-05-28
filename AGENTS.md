@@ -4,6 +4,8 @@ Audience Ops es agent-agnóstico. Las 5 skills viven en [`.claude/skills/`](./.c
 
 **Modelo de uso (v0.2.0+)**: una instancia de Audience Ops por repo. Las skills operan sobre `<repo>/audience-ops/` — no hay `portfolio.yaml` ni `projects/<slug>/`. El "proyecto" es implícitamente el repo host (`basename(<repo-root>)`). Multi-proyecto = instalar el tool en varios repos.
 
+**Dossiers por proyecto (v0.3.0+, opcional)**: si una instancia tiene `audience-ops/projects/<slug>.md` con `slug_prefix:` en frontmatter, las skills (concretamente `draft`) los leen como contexto cuando el slug de la idea matchea. Convención opcional. Agentes operando esta instancia deben tratar el directorio `projects/` como fuente de contexto factual (qué es el producto, story log reciente, ángulos abiertos), pero el ángulo de la idea y el formato del canal siguen mandando en la generación.
+
 ## Cómo entra cada motor
 
 ### Claude Code

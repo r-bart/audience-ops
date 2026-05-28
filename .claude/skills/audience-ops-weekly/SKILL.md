@@ -3,7 +3,7 @@ name: audience-ops-weekly
 description: "Ritual semanal del operating system de contenidos: triage del inbox, vista de calendario, hygiene continua. Modo `--cleanup` para limpieza trimestral (archivado de publicadas viejas, drafts abandonados, ideas killed, proyectos paused)."
 metadata:
   author: r-bart
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # weekly — Ritual semanal + cleanup trimestral

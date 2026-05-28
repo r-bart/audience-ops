@@ -89,6 +89,8 @@ your-product-repo/
     ├── ideas/
     │   ├── _inbox.md                   ← quick capture, append-only, dated lines
     │   └── <slug>.md                   ← structured ideas
+    ├── projects/                       ← (v0.3.0+) per-project dossiers (optional)
+    │   └── <project>.md                ← qué es / audiencia / story log / ángulos abiertos
     └── publications/                   ← drafts + ready + published (state in frontmatter)
         └── <idea>-<channel>.md
 ```
@@ -190,6 +192,24 @@ Always bumps `last_reviewed` to today on save. Warns up front if the existing `l
 
 This skill **does not touch `voice.md` or channels** — those are separate files with their own lifecycle. Run `init` if you need to add a channel.
 
+### Capture per project · Story log + ángulos abiertos *(v0.3.0+, optional)*
+
+If your instance manages content for multiple products (e.g., one indie hacker, 4 brands), declare each project during `init` (or later with `init --add-project`) and you get scaffolded dossiers in `audience-ops/projects/`.
+
+Each dossier:
+
+- Lives as plain markdown — you edit it by hand.
+- Carries a `slug_prefix:` (e.g. `bl`, `vx`, `aop`) — ideas prefixed accordingly bind to it.
+- Holds four sections: `## Qué es`, `## Audiencia`, `## Story log`, `## Ángulos abiertos`.
+
+**Story log** is the capture surface for raw events (decisions, metrics, bugs, conversations) that may become publishable later. **Ángulos abiertos** is the "this could be an idea someday" buffer.
+
+When you draft an idea whose slug starts with a known prefix (`/audience-ops-draft bl-cloudflare-migration newsletter`), `draft` reads the matching dossier automatically and includes its content as generation context. No more pasting "remember Brakinglab is on Cloudflare..." into every draft prompt.
+
+**Manually editing**: dossiers are markdown files. Use any editor, or talk to your agent (*"append to brakinglab dossier story log: ..."*). No skill writes to story log or ángulos abiertos automatically — it's your reservoir.
+
+**Optional**: instances without dossiers continue to work identically to v0.2.0. Declare projects only if you want the dossier pattern.
+
 ### Day to day · Capture
 
 ```
@@ -288,6 +308,7 @@ See [`AGENTS.md`](./AGENTS.md) for details.
 - ✅ Phase 5 · `.claude/skills/audience-ops-strategy/SKILL.md`.
 - ✅ Phase 6 · `.claude/skills/audience-ops-weekly/SKILL.md` (normal + `--cleanup` modes).
 - ✅ Phase 7 · v0.2.0 single-instance-per-repo refactor: killed `portfolio.yaml` + `projects/<slug>/` nesting; one `audience-ops/` namespace per host repo.
+- ✅ Phase 8 · v0.3.0 dossier pattern: per-project capture surface (story log + ángulos abiertos) + `draft` auto-read on slug-prefix match.
 
 See [`thoughts/plans/2026-05-21_audience-ops-mvp.md`](./thoughts/plans/2026-05-21_audience-ops-mvp.md) for the full plan and [`SPEC.md`](./SPEC.md) for the technical spec.
 

@@ -3,7 +3,7 @@ name: audience-ops-idea
 description: "Captura ideas rápido al inbox de la instancia, o promueve una entrada del inbox a idea estructurada con pilar, canales y ángulo."
 metadata:
   author: r-bart
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # idea — Captura y promoción de ideas
@@ -73,7 +73,7 @@ Mostrar la línea añadida + ruta del fichero. Sin más.
 
 Preguntar (en este orden, con sugerencias cuando se pueda):
 
-- **Slug** (kebab-case, único dentro de `audience-ops/ideas/`). Sugerir basado en el texto.
+- **Slug** (kebab-case, único dentro de `audience-ops/ideas/`). Sugerir basado en el texto. Si la idea pertenece claramente a un proyecto con dossier en `audience-ops/projects/`, usar el `slug_prefix` declarado al principio del slug (ej. `bl-foo`, `vx-bar`, `aop-baz`). Convención opcional pero recomendada — permite a `draft` cargar el dossier automáticamente como contexto.
 - **Pilar**: mostrar la lista de pilares de `audience-ops/strategy.md` y pedir uno. Si el usuario quiere uno fuera de la lista, advertir y permitir.
 - **Canales destino**: mostrar la lista de canales activos (`audience-ops/channels/*.md`); pedir cero o más. Pueden añadirse después.
 - **Hook / ángulo**: una o dos frases. Cómo se va a abordar la idea.

@@ -3,7 +3,7 @@ name: audience-ops-strategy
 description: "Interview para crear o actualizar el `strategy.md` de la instancia (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
 metadata:
   author: r-bart
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # strategy — Crear o actualizar la estrategia de la instancia
