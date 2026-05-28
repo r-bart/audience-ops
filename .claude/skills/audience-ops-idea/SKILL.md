@@ -3,7 +3,7 @@ name: audience-ops-idea
 description: Captura ideas rápido al inbox de un proyecto, o promueve una entrada del inbox a idea estructurada con pilar, canales y ángulo.
 metadata:
   author: r-bart
-  version: "0.1.0"
+  version: "0.9.0"
 ---
 
 # idea — Captura y promoción de ideas

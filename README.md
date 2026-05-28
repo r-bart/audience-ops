@@ -248,25 +248,10 @@ See [`AGENTS.md`](./AGENTS.md) for details.
 - ✅ Phase 1 · Repo bootstrap.
 - ✅ Phase 2 · `.claude/skills/audience-ops-init/SKILL.md`.
 - ✅ Phase 3 · `.claude/skills/audience-ops-idea/SKILL.md` + `.claude/skills/audience-ops-draft/SKILL.md`.
-- ⏳ Phase 4 · Dogfooding on a real project.
 - ⏳ Phase 5 · `.claude/skills/audience-ops-strategy/SKILL.md`.
 - ⏳ Phase 6 · `.claude/skills/audience-ops-weekly/SKILL.md` (normal + `--cleanup` modes).
 
 See [`thoughts/plans/2026-05-21_audience-ops-mvp.md`](./thoughts/plans/2026-05-21_audience-ops-mvp.md) for the full plan and [`SPEC.md`](./SPEC.md) for the technical spec.
-
----
-
-## Roadmap (post-MVP)
-
-Ideas that don't make the MVP but could land if real usage justifies them:
-
-- **Lightweight CLI** (`co`) for terminal capture without invoking an agent.
-- **Structure validation / linting** (`co lint`).
-- **Wider distribution** — already installable via [skills.sh](https://skills.sh) across 50+ agents; a native Claude Code plugin wrapper could come if usage justifies it.
-- **Scheduler-specific outputs** — variants per scheduler (Typefully, Buffer) on top of per-channel.
-- **Per-project assets** (`assets/`) for screenshots and diagrams referenced from publications.
-
-None are prioritized — all wait on real dogfooding.
 
 ---
 
