@@ -1,164 +1,117 @@
 ---
 name: audience-ops-init
-description: "Bootstrap del repo Audience Ops (si está vacío) o añade un nuevo proyecto. Encadena la creación de estructura, estrategia, voz y canales en un flujo guiado."
+description: "Inicializa una instancia de Audience Ops en el directorio actual creando una carpeta `audience-ops/` con la estructura completa (strategy, voice, channels, ideas, publications). Una instancia por repo."
 metadata:
   author: r-bart
-  version: "0.11.1"
+  version: "0.12.0"
 ---
 
-# init — Bootstrap del repo + primer proyecto
+# init — Bootstrap de una instancia de Audience Ops
 
 ## Cuándo usar esta skill
 
-- El repo es nuevo y `portfolio.yaml` está vacío (sin proyectos).
-- Quieres añadir un nuevo proyecto a un repo Audience Ops ya inicializado.
+- El directorio actual no tiene aún una carpeta `audience-ops/`.
+- Quieres montar la operativa de contenidos para este proyecto (sea un repo de código o un directorio dedicado).
+
+Una instancia por repo. Si necesitas operar varios proyectos en paralelo, instala el tool en cada repo y `init` en cada uno.
 
 ## Entradas
 
 - Ninguna obligatoria. Todo se pregunta en el flujo.
-- Opcional: el usuario puede pasar un slug propuesto o un name al invocar.
 
 ## Lectura previa
 
 Antes de actuar, leer:
 
-1. `portfolio.yaml` — para saber si hay owner definido y qué proyectos existen.
-2. `config.yaml` — para ver defaults actuales.
-3. `projects/` — listar slugs ya existentes para evitar colisiones.
+1. `./audience-ops/config.yaml` — si existe ya, ABORT con mensaje: "audience-ops/ ya está inicializado en este directorio. Para editar, modifica los ficheros directamente. Para empezar de cero, `rm -rf audience-ops/` antes de re-invocar."
+2. `./portfolio.yaml`, `./projects/` — si existen (residuos de v0.11.x): avisar al usuario una vez ("detectado layout v0.11.x; ver release notes de v0.12.0 para migración manual") y continuar con la creación de `audience-ops/` en paralelo.
 
 ## Pasos
 
-### Paso 1 · Detectar estado del repo
+### Paso 1 · Confirmar contexto
 
-- Si `portfolio.yaml` no tiene `owner:` definido → **modo bootstrap completo** (paso 2 incluido).
-- Si `owner:` está definido y `projects:` está vacío o tiene entradas → **modo añadir proyecto** (saltar al paso 3).
-
-### Paso 2 · Bootstrap (solo si modo bootstrap completo)
-
-Preguntar al usuario:
-
-- Su nombre (para `owner:` en `portfolio.yaml`).
-- Su email (opcional, para `config.yaml`).
-
-Escribir en `portfolio.yaml`:
-
-```yaml
-owner: <nombre>
-projects: []
-```
-
-Escribir en `config.yaml` (solo si los campos `owner.name` / `owner.email` están vacíos):
-
-```yaml
-owner:
-  name: <nombre>
-  email: <email>
-```
-
-Confirmar al usuario antes de escribir.
-
-### Paso 3 · Datos del nuevo proyecto
-
-Preguntar:
-
-- **Slug**: kebab-case, único. Validar contra `projects/` y `portfolio.yaml`. Si colisiona, pedir otro.
-- **Name**: nombre humano (ej. "Verxion").
-- **One-liner**: descripción de una línea.
-- **Status**: `active | building | paused | archived` (default: `building`).
-- **URL** (opcional): URL principal del proyecto.
-- **Started** (opcional): mes/año de arranque, formato `YYYY-MM`.
-
-### Paso 4 · Crear estructura del proyecto
-
-Mostrar al usuario el árbol que se va a crear y pedir confirmación antes de escribir nada:
+Mostrar al usuario:
 
 ```
-projects/<slug>/
-├── strategy.md          (placeholder, se rellena en paso 5)
-├── voice.md             (placeholder, se rellena en paso 6)
-├── channels/            (se rellena en paso 7)
+Voy a crear `./audience-ops/` con:
+  config.yaml, strategy.md, voice.md, channels/, ideas/, publications/
+
+El "proyecto" es implícitamente este directorio: <basename(CWD)>.
+
+¿Continuar?
+```
+
+Si el usuario confirma, seguir. Si no, abortar.
+
+### Paso 2 · Crear estructura base
+
+Crear:
+
+```
+./audience-ops/
+├── config.yaml          (con defaults; placeholder en owner)
+├── strategy.md          (placeholder, se rellena en paso 4)
+├── voice.md             (placeholder, se rellena en paso 5)
+├── channels/            (se rellena en paso 6)
+│   └── .gitkeep
 ├── ideas/
-│   └── _inbox.md        (vacío, con cabecera)
-└── publications/        (vacía)
+│   └── _inbox.md        (vacío con cabecera)
+└── publications/
+    └── .gitkeep
 ```
 
-Tras confirmación, crear:
-
-- `projects/<slug>/ideas/_inbox.md` con contenido:
-  ```markdown
-  # Inbox
-
-  <!-- Una línea por idea. Formato: YYYY-MM-DD · texto -->
-  ```
-- `projects/<slug>/publications/.gitkeep` vacío.
-- `projects/<slug>/channels/.gitkeep` vacío (se sustituye al definir canales).
-
-### Paso 5 · Actualizar `portfolio.yaml`
-
-Añadir entrada del proyecto a la lista `projects`:
+Contenido de `audience-ops/config.yaml`:
 
 ```yaml
-- slug: <slug>
-  name: <name>
-  one_liner: "<one_liner>"
-  status: <status>
-  url: <url>            # omitir si no se dio
-  started: <started>    # omitir si no se dio
+# config.yaml — cómo se comporta esta instancia de Audience Ops
+
+owner:
+  name:
+  email:
+
+behavior:
+  inbox_auto_promote: false
+  cleanup_threshold_days: 90
+  stale_draft_days: 30
+  stale_inbox_days: 30
+  strategy_review_months: 4
+  paused_archive_threshold_months: 6
+  learnings_prompt_threshold_days: 60
+  prompt_learnings_on_publish: true
+  scheduler: typefully
 ```
 
-Si `defaults.project` en `config.yaml` está vacío y este es el primer proyecto, ofrecer fijarlo como default.
-
-### Paso 6 · Sub-flujo · Estrategia
-
-Si existe la skill `audience-ops-strategy` (`.claude/skills/audience-ops-strategy/SKILL.md`), delegar la creación de `strategy.md` a esa skill invocándola sobre el nuevo proyecto.
-
-Si no existe (caso bootstrap muy temprano), hacer una versión rudimentaria inline:
-
-Preguntar al usuario y construir `projects/<slug>/strategy.md`:
+Contenido de `audience-ops/ideas/_inbox.md`:
 
 ```markdown
----
-slug: <slug>
-last_reviewed: <YYYY-MM-DD de hoy>
-pillars:
-  - <pillar-1>
-  - <pillar-2>
-  - <pillar-3>
----
+# Inbox
 
-## Posicionamiento
-
-<respuesta del usuario>
-
-## Audiencia / ICP
-
-<respuesta del usuario>
-
-## Pilares
-
-### <pillar-1>
-<descripción>
-
-### <pillar-2>
-<descripción>
-
-### <pillar-3>
-<descripción>
-
-## Objetivos
-
-- <objetivo trimestral si lo dijo>
-
-## Anti-temas
-
-- <lo que no se trata, si lo dijo>
+<!-- Una línea por idea. Formato: YYYY-MM-DD · texto -->
 ```
+
+### Paso 3 · Owner (opcional)
+
+Si `audience-ops/config.yaml` `owner.name` o `owner.email` están vacíos, preguntar al usuario y rellenar. El usuario puede saltar dejándolos en blanco; no se vuelve a preguntar en el futuro.
+
+### Paso 4 · Sub-flujo · Estrategia
+
+Si existe la skill `audience-ops-strategy` (`.claude/skills/audience-ops-strategy/SKILL.md`), delegar la creación de `audience-ops/strategy.md` a esa skill.
+
+Si no existe (caso bootstrap muy temprano), hacer una versión rudimentaria inline. Preguntar al usuario por:
+
+- Posicionamiento (frase)
+- Audiencia / ICP (rol + trigger + qué probó + dónde lee)
+- Pilares (2-5; slug + descripción)
+- Objetivos (opcional; formato `<periodo>: <métrica>`)
+- Anti-temas (opcional)
+
+Y construir `audience-ops/strategy.md` con frontmatter (`last_reviewed: <hoy>`, `pillars: [...]`) y prosa con H2s. **Sin campo `slug` en frontmatter** (el "proyecto" es el repo host).
 
 Si el usuario quiere posponer alguna sección, dejarla con `_pendiente_` y avisar.
 
-### Paso 7 · Sub-flujo · Voz y tono
+### Paso 5 · Sub-flujo · Voz y tono
 
-Antes de preguntar, mostrar al usuario los **ejemplos canónicos** (lift directo del SPEC §5 voice.md) etiquetados como "Ejemplo (no obligatorio)" para anclar expectativas. El usuario puede:
+Antes de preguntar, mostrar al usuario los **ejemplos canónicos** etiquetados como "Ejemplo (no obligatorio)" para anclar expectativas. El usuario puede:
 
 - Decir "como el ejemplo" en cualquier sub-sección → el skill escribe el ejemplo verbatim.
 - Refinarlo o reescribirlo a su gusto.
@@ -191,12 +144,11 @@ Preguntar al usuario por:
 - **No** (3–5 cosas que no se hacen, o di "como el ejemplo").
 - **Referencias** (autores/marcas que inspiran la voz, opcional, o di "como el ejemplo").
 
-Escribir `projects/<slug>/voice.md`:
+Escribir `audience-ops/voice.md`:
 
 ```markdown
 ## Atributos
 - <attr-1>
-- <attr-2>
 - ...
 
 ## Sí
@@ -211,19 +163,19 @@ Escribir `projects/<slug>/voice.md`:
 - <ref-1>
 ```
 
-### Paso 8 · Sub-flujo · Canales
+### Paso 6 · Sub-flujo · Canales
 
 Preguntar: "¿Qué canales activos quieres registrar para este proyecto?" (ejemplos: X, LinkedIn, blog, newsletter, YouTube, Reddit).
 
 Para cada canal indicado, preguntar:
 
-- **id** (slug del canal: `x`, `linkedin`, `newsletter`, etc.).
-- **handle** (`@usuario`, URL, o nombre humano).
-- **url** (opcional).
-- **cadence** (ej. `3/week`, `1/month`).
-- **platform** (opcional, ej. `beehiiv`, `ghost` para newsletters).
+- **id** (`x`, `linkedin`, `newsletter`, etc.)
+- **handle** (`@usuario`, URL, o nombre humano)
+- **url** (opcional)
+- **cadence** (ej. `3/week`, `1/month`)
+- **platform** (opcional, ej. `beehiiv`, `ghost` para newsletters)
 
-Crear `projects/<slug>/channels/<id>.md` para cada uno:
+Crear `audience-ops/channels/<id>.md` por cada uno:
 
 ```markdown
 ---
@@ -237,7 +189,7 @@ status: active
 
 ## Formato
 
-<formato canónico para este canal; se rellena con sugerencias por defecto según el id>
+<formato canónico para este canal; rellenar con sugerencias según el id>
 
 ## Ajustes de voz (override sobre voice.md)
 
@@ -252,7 +204,7 @@ status: active
 <sugerencias>
 ```
 
-Eliminar `projects/<slug>/channels/.gitkeep` si se creó al menos un canal.
+Eliminar `audience-ops/channels/.gitkeep` si se creó al menos un canal.
 
 #### Sugerencias por defecto de formato según `id`
 
@@ -265,47 +217,49 @@ Eliminar `projects/<slug>/channels/.gitkeep` si se creó al menos un canal.
 
 Si el `id` no está en la lista, dejar la sección `## Formato` con un placeholder y avisar al usuario que la complete.
 
-### Paso 9 · Resumen final
+### Paso 7 · Resumen final
 
 Mostrar al usuario:
 
-- Resumen de lo creado: ficheros, carpetas, canales registrados.
-- Siguientes pasos sugeridos:
+- Resumen de lo creado: estructura de `audience-ops/`, canales registrados.
+- El "proyecto" del repo es `<basename(CWD)>`.
+- Siguientes pasos:
   - "Captura tu primera idea: `/audience-ops-idea \"<texto>\"`".
-  - "Cuando tengas 3–5 ideas, genera un primer draft: `/audience-ops-draft <idea-slug> <channel>`".
-  - "Revisa o profundiza la estrategia en cualquier momento: `/audience-ops-strategy`".
+  - "Cuando tengas 3-5 ideas, genera un primer draft: `/audience-ops-draft <idea-slug> <channel>`".
+  - "Revisa la estrategia en cualquier momento: `/audience-ops-strategy`".
 
 ## Escritura · Ficheros creados o modificados
 
 | Fichero | Acción |
 |---|---|
-| `portfolio.yaml` | Añadir owner (si bootstrap) y entrada del proyecto |
-| `config.yaml` | Rellenar owner y opcionalmente `defaults.project` |
-| `projects/<slug>/strategy.md` | Crear |
-| `projects/<slug>/voice.md` | Crear |
-| `projects/<slug>/channels/<id>.md` | Crear uno por canal |
-| `projects/<slug>/ideas/_inbox.md` | Crear vacío con cabecera |
-| `projects/<slug>/publications/.gitkeep` | Crear |
+| `./audience-ops/config.yaml` | Crear |
+| `./audience-ops/strategy.md` | Crear |
+| `./audience-ops/voice.md` | Crear |
+| `./audience-ops/channels/<id>.md` | Crear uno por canal |
+| `./audience-ops/ideas/_inbox.md` | Crear con cabecera |
+| `./audience-ops/publications/.gitkeep` | Crear |
 
 ## Criterios de éxito
 
-- `portfolio.yaml` contiene el nuevo proyecto en `projects:`.
-- `projects/<slug>/` existe con `strategy.md`, `voice.md`, `channels/<id>.md` (≥1), `ideas/_inbox.md`, `publications/`.
-- `strategy.md` tiene frontmatter con `pillars` listados y `last_reviewed` = hoy.
+- `./audience-ops/` existe con `config.yaml`, `strategy.md`, `voice.md`, `channels/<id>.md` (≥1), `ideas/_inbox.md`, `publications/`.
+- `strategy.md` tiene frontmatter con `pillars` listados y `last_reviewed: hoy`. **Sin** `slug:`.
 - Cada `channels/<id>.md` tiene frontmatter completo (`id`, `handle`, `cadence`, `status`).
 - El usuario confirmó cada paso de escritura.
+- `portfolio.yaml` no fue creado (no existe).
+- `projects/<slug>/` no fue creado.
 
 ## Errores y casos límite
 
-- **Slug colisiona** con proyecto existente: pedir uno nuevo, no asumir.
-- **Usuario interrumpe a mitad** (por ejemplo, tras crear estructura pero antes de canales): dejar lo creado, avisar de qué falta, sugerir reanudar invocando `init` con el slug existente (modo "completar proyecto a medio hacer").
-- **`portfolio.yaml` ya tiene entrada para el slug pero `projects/<slug>/` no existe**: avisar de inconsistencia, ofrecer crear la carpeta o eliminar la entrada huérfana.
-- **Channel `id` desconocido**: aceptar (puede ser un canal nuevo), pero placeholder en formato + warning.
-- **El usuario no quiere voz aún**: crear `voice.md` con todas las secciones marcadas `_pendiente_`. La skill `draft` tratará `_pendiente_` como "sin restricciones específicas".
+- **`./audience-ops/` ya existe con config.yaml**: abortar con mensaje claro. No sobreescribir.
+- **Layout v0.11.x detectado** (presencia de `./portfolio.yaml` o `./projects/`): avisar una vez, continuar creando `audience-ops/` en paralelo. La migración manual es decisión del usuario.
+- **Usuario interrumpe a mitad** (por ejemplo, tras crear estructura pero antes de canales): dejar lo creado, avisar de qué falta, sugerir reanudar invocando `init` (que detectará `audience-ops/` parcial y abortará — el usuario completa a mano).
+- **Channel `id` desconocido**: aceptar, placeholder en formato + warning.
+- **Usuario no quiere voz aún**: crear `voice.md` con secciones marcadas `_pendiente_`.
 
 ## Principios que aplica
 
 - **Cero magia.** Confirmación antes de cada escritura.
-- **El proyecto se deriva del path.** Slug del proyecto = nombre de carpeta = `slug:` en yaml. Misma fuente.
-- **Frontmatter mínimo.** Solo `pillars` y `last_reviewed` en strategy; resto en prosa.
-- **Soft archive desde el inicio.** No se crea `archive/` por adelantado, pero la convención existe.
+- **Convención sobre configuración.** `audience-ops/` es el namespace fijo; el "proyecto" se deriva del repo host.
+- **Una sola fuente de verdad.** Owner en config.yaml, no duplicado en portfolio (que no existe).
+- **Frontmatter mínimo.** Solo `pillars` y `last_reviewed` en strategy. Sin `slug`.
+- **Single-instance.** Una instancia por repo. Multi-proyecto = varios repos.

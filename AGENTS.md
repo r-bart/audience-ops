@@ -2,6 +2,8 @@
 
 Audience Ops es agent-agnóstico. Las 5 skills viven en [`.claude/skills/`](./.claude/skills/) como playbooks markdown puros (un directorio por skill, con `SKILL.md` dentro). Cualquier agente capaz de leer markdown puede operar el sistema.
 
+**Modelo de uso (v0.12.0+)**: una instancia de Audience Ops por repo. Las skills operan sobre `<repo>/audience-ops/` — no hay `portfolio.yaml` ni `projects/<slug>/`. El "proyecto" es implícitamente el repo host (`basename(<repo-root>)`). Multi-proyecto = instalar el tool en varios repos.
+
 ## Cómo entra cada motor
 
 ### Claude Code

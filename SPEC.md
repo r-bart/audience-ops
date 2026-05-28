@@ -53,7 +53,7 @@
 4. **Vistas regenerables.** Calendario, índices, hygiene — se computan al vuelo.
 5. **Convención sobre configuración.** Una sola forma canónica de estructurar cada cosa.
 6. **El proyecto se deriva del path.** No se duplica en frontmatter.
-7. **Multi-proyecto nativo.** Aun con un solo proyecto, vive bajo `projects/<slug>/`.
+7. **Single-instance por repo.** Cada repo de producto (o directorio dedicado) tiene su propia instancia de Audience Ops bajo `<repo>/audience-ops/`. Multi-proyecto se logra **teniendo el tool en varios repos**, no agregando proyectos dentro de un mismo `audience-ops/`. Si necesitas vistas cruzadas entre instancias, se hace fuera de la skill. Decisión consciente: simplificar el modelo común a costa de las superpowers cross-instance.
 8. **Soft archive, nunca delete.** Mover a `archive/`, jamás `rm`. Git refuerza pero el archive baja la fricción mental.
 9. **Cero magia.** Nada se mueve, archiva o publica sin confirmación del usuario.
 10. **El usuario es dueño.** Texto plano, cualquier editor, git friendly.
@@ -64,93 +64,65 @@
 ## 4. Estructura de carpetas
 
 ```
-audience-ops/                     ← repo template clonable
-├── README.md                     ← intro humana, cómo arrancar
-├── AGENTS.md                     ← cómo cualquier agente opera el sistema
-├── portfolio.yaml                ← qué proyectos existen
-├── config.yaml                   ← cómo se comporta (defaults, integraciones)
-│
-├── .claude/                      ← glue de Claude Code
-│   ├── settings.json
-│   └── skills/                   ← 5 playbooks markdown, agent-agnósticos
-│       ├── audience-ops-init/SKILL.md
-│       ├── audience-ops-strategy/SKILL.md
-│       ├── audience-ops-idea/SKILL.md
-│       ├── audience-ops-draft/SKILL.md
-│       └── audience-ops-weekly/SKILL.md
-│
-└── projects/
-    └── <slug>/
-        ├── strategy.md           ← posicionamiento, ICP, pilares, objetivos
-        ├── voice.md              ← voz y tono (leído por draft en cada invocación)
-        ├── channels/
-        │   ├── x.md              ← frontmatter (handle, cadencia) + prosa (formato)
-        │   ├── linkedin.md
-        │   ├── newsletter.md
-        │   └── archive/          ← canales que ya no usas
-        ├── ideas/
-        │   ├── _inbox.md         ← captura rápida, append-only, líneas con fecha
-        │   ├── <slug>.md         ← idea formalizada
-        │   └── archive/          ← ideas killed o abandonadas
-        └── publications/
-            ├── <idea-slug>-<channel>.md
-            └── archive/
-                ├── 2025/         ← published > 90 días, agrupadas por año
-                └── abandoned/    ← drafts muertos
+<host-repo>/                              ← repo del producto o directorio dedicado
+└── audience-ops/                         ← namespace fijo, una instancia por repo
+    ├── config.yaml                       ← comportamiento (umbrales, flags); sin defaults.project
+    ├── strategy.md                       ← positioning, ICP, pilares, objetivos, anti-temas
+    ├── voice.md                          ← voz y tono
+    ├── channels/
+    │   ├── <id>.md                       ← un fichero por canal activo
+    │   └── archive/                      ← canales pausados/retirados
+    ├── ideas/
+    │   ├── _inbox.md                     ← captura rápida, append-only, líneas con fecha
+    │   ├── <slug>.md                     ← idea formalizada
+    │   └── archive/                      ← ideas killed o abandonadas
+    └── publications/
+        ├── <idea-slug>-<channel>.md
+        └── archive/
+            ├── <año>/                    ← published > cleanup_threshold_days
+            └── abandoned/                ← drafts muertos
 ```
 
+El **repo de la herramienta** (este repo, `r-bart/audience-ops`) tiene su propio layout (README, AGENTS, SPEC, LICENSE, `.claude/skills/audience-ops-*/SKILL.md`, `skills.sh.json`) — es ortogonal a esta sección. Lo que se describe aquí es la estructura que `init` crea en el repo del usuario.
+
 **Convenciones transversales.**
-- `archive/` es válida en cualquier nivel. Las skills la ignoran en vistas activas.
-- Filenames de publicaciones: `<idea-slug>-<channel>.md`. Sin prefijo de fecha (sort por frontmatter).
+- `archive/` es válida en cualquier nivel dentro de `audience-ops/`. Las skills la ignoran en vistas activas.
+- Filenames de publicaciones: `<idea-slug>-<channel>.md`. Sin prefijo de fecha (sort por frontmatter `scheduled_for`).
 - Backlinks entre ideas: `[[idea-slug]]` en el cuerpo del markdown. Sin frontmatter, sin esquema.
 - Las entradas del `_inbox.md` empiezan con `YYYY-MM-DD ·` para que `weekly` detecte staleness.
+
+**El "proyecto" es implícitamente el repo host.** El identificador del proyecto, cuando se necesita en outputs (calendario, prompts, confirmaciones), se deriva del nombre del directorio raíz del repo (`basename(<repo-root>)`). No hay slug, no hay `name:` configurable. Multi-proyecto se logra teniendo el tool instalado en varios repos.
 
 ---
 
 ## 5. Esquemas de ficheros clave
 
-### `portfolio.yaml`
-
-```yaml
-owner: Roberto Diaz
-
-projects:
-  - slug: verxion
-    name: Verxion
-    one_liner: "Fitness data + training intelligence para gente que entrena en serio"
-    status: active            # active | building | paused | archived
-    url: https://verxion.com
-    started: 2025-01
-
-  - slug: audience-ops
-    name: Audience Ops
-    one_liner: "Sistema operativo de contenidos para indie hackers"
-    status: building
-    started: 2026-05
-```
-
-### `config.yaml`
+### `audience-ops/config.yaml`
 
 ```yaml
 owner:
   name: Roberto
   email: robertodzbt@gmail.com
-defaults:
-  project: verxion              # proyecto activo cuando no se especifica
-  scheduler: typefully          # hint para el handoff ready→published
+
 behavior:
-  inbox_auto_promote: false     # las ideas no se promueven solas
-  cleanup_threshold_days: 90    # umbral para archivar publicaciones publicadas
-  stale_draft_days: 30          # weekly flagea drafts más viejos
-  stale_inbox_days: 30          # weekly flagea entradas de inbox más viejas
+  inbox_auto_promote: false              # las ideas no se promueven solas
+  cleanup_threshold_days: 90             # umbral para archivar publicaciones publicadas
+  stale_draft_days: 30                   # weekly flagea drafts más viejos sin tocar
+  stale_inbox_days: 30                   # weekly flagea entradas de inbox más viejas
+  strategy_review_months: 4              # strategy avisa si last_reviewed es más viejo
+  paused_archive_threshold_months: 6     # vestigial post-v0.12.0; conservado por compatibilidad
+  learnings_prompt_threshold_days: 60    # weekly --cleanup ofrece añadir aprendizajes retroactivos
+  prompt_learnings_on_publish: true      # weekly hygiene 3b pregunta por aprendizajes
+  scheduler: typefully                   # hint informativo para el handoff ready → published
 ```
 
-### `projects/<slug>/strategy.md`
+Sin bloque `defaults:` (eliminado en v0.12.0). El `scheduler` se conserva como hint dentro de `behavior:`. Sin `defaults.project` — el "proyecto" es implícitamente el repo host.
+
+### `audience-ops/strategy.md`
 
 ```markdown
 ---
-slug: verxion
-last_reviewed: 2026-04-12       # opcional; strategy avisa si pasa de 4 meses
+last_reviewed: 2026-04-12       # opcional; strategy avisa si pasa de strategy_review_months
 pillars:
   - behind-the-build
   - fitness-data-thinking
@@ -178,7 +150,7 @@ pillars:
 
 Frontmatter minimalista: solo lo que las skills necesitan parsear (`pillars`, `last_reviewed`). El resto es prosa con H2s convencionales.
 
-### `projects/<slug>/voice.md`
+### `audience-ops/voice.md`
 
 ```markdown
 ## Atributos
@@ -198,7 +170,7 @@ Frontmatter minimalista: solo lo que las skills necesitan parsear (`pillars`, `l
 - escribe como Paul Graham, no como Gary Vee
 ```
 
-### `projects/<slug>/channels/<id>.md`
+### `audience-ops/channels/<id>.md`
 
 ```markdown
 ---
@@ -226,7 +198,7 @@ status: active
 - Hilos motivacionales genéricos
 ```
 
-### `projects/<slug>/channels/newsletter.md`
+### `audience-ops/channels/newsletter.md`
 
 ```markdown
 ---
@@ -256,7 +228,7 @@ El fichero `publications/<idea>-newsletter.md` debe llevar en frontmatter:
 - Más cercano que en blog; "yo" y "tú" permitidos
 ```
 
-### `projects/<slug>/ideas/_inbox.md`
+### `audience-ops/ideas/_inbox.md`
 
 ```markdown
 # Inbox
@@ -268,7 +240,7 @@ El fichero `publications/<idea>-newsletter.md` debe llevar en frontmatter:
 
 Una línea = una idea. Prefijo `YYYY-MM-DD ·`. Append-only.
 
-### `projects/<slug>/ideas/<slug>.md`
+### `audience-ops/ideas/<slug>.md`
 
 ```markdown
 ---
@@ -291,7 +263,7 @@ created: 2026-05-15
 
 Sin campo `status`. El estado se deriva del estado agregado de sus publicaciones.
 
-### `projects/<slug>/publications/<idea-slug>-<channel>.md`
+### `audience-ops/publications/<idea-slug>-<channel>.md`
 
 ```markdown
 ---
@@ -333,19 +305,21 @@ Reglas:
 
 ## 6. Skills MVP (5)
 
+Todas las rutas son relativas a la instancia (`<repo-host>/audience-ops/`).
+
 | Skill | Rol | Lee | Escribe |
 |---|---|---|---|
-| `init` | Bootstrap: estructura raíz + primer proyecto (encadena strategy + voice + canales en flujo guiado) | — | toda la estructura |
-| `strategy` | Interview para crear/actualizar `strategy.md`. Avisa si `last_reviewed` pasa del umbral | `strategy.md` | `strategy.md` |
-| `idea` | Dos modos: captura rápida al `_inbox` con prefijo de fecha; o promoción a idea estructurada (slug, pilar, canales, ángulo) | `strategy.md` (pilares), `_inbox.md` | `_inbox.md`, `ideas/<slug>.md` |
-| `draft` | Idea + canal → draft en `publications/`. Repurpose = misma skill con una publicación existente como input. Incluye revisión final antes de marcar `ready` | `voice.md`, `channels/<id>.md`, idea (idea-slug obligatorio; anchor para repurpose), publicación existente (si repurpose) | `publications/<...>.md` |
-| `weekly` | Ritual: triage del inbox, vista de calendario global y/o per-project, qué promover a draft, qué revisar, hygiene continua. Modo `--cleanup` para limpieza trimestral | todo | mueve estados en frontmatter, archiva |
+| `init` | Bootstrap de una instancia (crea `audience-ops/` con strategy + voice + canales + inbox vacío) | — | toda la estructura `audience-ops/` |
+| `strategy` | Interview para crear/actualizar `strategy.md`. Avisa si `last_reviewed` pasa del umbral. En modo update, lee aprendizajes por pilar para sugerir iteración | `audience-ops/strategy.md`, `audience-ops/publications/*.md` (aprendizajes) | `audience-ops/strategy.md` |
+| `idea` | Dos modos: captura rápida al `_inbox` con prefijo de fecha; o promoción a idea estructurada (slug, pilar, canales, ángulo) | `audience-ops/strategy.md` (pilares), `audience-ops/ideas/_inbox.md` | `audience-ops/ideas/_inbox.md`, `audience-ops/ideas/<slug>.md` |
+| `draft` | Idea + canal → draft en `audience-ops/publications/`. Modos `--from` (repurpose) y `--to` (batch a N canales). Incluye revisión final antes de marcar `ready` | `audience-ops/voice.md`, `audience-ops/channels/<id>.md`, idea (idea-slug obligatorio; anchor para repurpose), publicación existente (si repurpose) | `audience-ops/publications/<...>.md` |
+| `weekly` | Ritual de la instancia local: triage del inbox, vista de calendario, qué promover a draft, hygiene continua. Modo `--cleanup` para limpieza trimestral | todo en `audience-ops/` | mueve estados en frontmatter, archiva |
 
 ### Detalle de `weekly` (la skill más cargada)
 
 **Modo normal (cada semana).**
 1. Triage de `_inbox.md`: para cada entrada nueva, ¿promover, dejar, matar?
-2. Calendario: vista global por defecto, filtro `weekly <proyecto>` para per-project.
+2. Calendario: vista de esta instancia (sin cross-instance; no hay `weekly <proyecto>` argumento).
 3. Hygiene continua:
    - Drafts > 30 días sin tocar → ¿abandonar?
    - Ready con `scheduled_for` ya pasado → ¿marcar como published?
@@ -357,7 +331,7 @@ Reglas:
 2. Drafts abandonados → mover a `publications/archive/abandoned/`.
 3. Ideas killed → mover a `ideas/archive/`.
 4. `strategy.md` con `last_reviewed` > 4 meses → propone revisión.
-5. Proyectos en `portfolio.yaml` con status `paused` desde hace mucho → propone `archived`.
+5. (Eliminado en v0.12.0: la propuesta de archivar proyectos pausados vivía en `portfolio.yaml`, que ya no existe).
 
 Toda acción requiere confirmación. Nada se mueve solo.
 
@@ -466,8 +440,14 @@ Cómo entra cada motor en el sistema:
 
 ## 10. Próximos pasos sugeridos
 
-1. **Bootstrap del repo:** crear `README.md`, `AGENTS.md`, `portfolio.yaml`, `config.yaml`, esqueleto de `.claude/skills/<slug>/SKILL.md` por skill, `.claude/settings.json`.
-2. **Escribir `init.md`** como playbook end-to-end — la skill más cargada, prueba del modelo de datos: crea estructura + primer proyecto + dispara strategy + voice + channels en cadena.
-3. **Escribir `idea.md` y `draft.md`** en su forma más simple — el flujo más corto que produce valor (captura → draft listo).
-4. **Dogfooding 2 semanas** sobre un proyecto real (Verxion u otro) antes de tocar `strategy` o `weekly`.
-5. **Iterar `weekly.md`** una vez haya datos reales que triagear y archivar.
+**Cambios arquitecturales (v0.12.0)**:
+
+- Multi-proyecto deja de ser nativo del sistema. Single-instance por repo bajo `audience-ops/`.
+- `portfolio.yaml` y `projects/<slug>/` desaparecen del modelo.
+- Multi-proyecto se logra teniendo el tool instalado en varios repos.
+- Cross-instance features (calendario global, repurpose cross-project) están explícitamente fuera; se retomarán si dogfooding las pide.
+
+**Pendiente**:
+
+1. **Dogfooding sobre un proyecto real** (Verxion u otro). Empezar.
+2. **v1.0.0** se alcanza cuando dogfooding valide el MVP sin fricciones críticas pendientes.

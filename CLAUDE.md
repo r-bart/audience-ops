@@ -105,10 +105,13 @@ The CLI compares **GitHub tree SHAs** of the skill folder, not git tags or `meta
 - `AGENTS.md` — how any agent (CC, Cursor, Aider, …) operates the system.
 - `SPEC.md` — full technical spec; the source of truth when playbooks and README disagree.
 - `skills.sh.json` — grouping metadata for the [skills.sh](https://skills.sh) directory page.
+- `config.yaml` — sample config (defaults). `init` writes a fresh copy into the user's `audience-ops/`.
 - `thoughts/plans/` — historical planning snapshots. Don't edit retroactively.
-- `portfolio.yaml`, `config.yaml`, `projects/.gitkeep` — example/template files; the user populates their own copies in their own content repo (see README).
+- `thoughts/specs/` — PRDs. Historical too.
 
 When you edit a playbook, you're editing the deliverable. Treat it like code.
+
+**Modelo de uso (v0.12.0+)**: Audience Ops es single-instance-per-repo. Cada `init` crea una carpeta `audience-ops/` en el directorio actual del invocador. El "proyecto" se deriva del nombre del repo host. Multi-proyecto se logra teniendo el tool instalado en varios repos. Cualquier mención histórica a `portfolio.yaml` o `projects/<slug>/` en commits/plans/specs de v0.11.x o anteriores es vestigial — no se aplica al modelo actual.
 
 ---
 

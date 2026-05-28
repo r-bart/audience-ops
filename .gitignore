@@ -34,7 +34,6 @@ build/
 private/
 scratch/
 
-# El contenido real (proyectos, ideas, publicaciones) vive en el repo de instancia
-# (ej. rbart-ventures-content). Aquí solo se trackea la estructura vacía.
-projects/*/
-!projects/.gitkeep
+# El repo de la herramienta no acumula contenido. Cualquier `audience-ops/` que
+# se cree aquí por testing local debe ignorarse (vive en repos host, no aquí).
+audience-ops/

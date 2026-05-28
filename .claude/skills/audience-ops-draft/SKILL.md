@@ -3,33 +3,33 @@ name: audience-ops-draft
 description: "Convierte una idea estructurada en un draft listo para un canal concreto. Aplica voz, formato del canal y ángulo de la idea. Soporta repurpose de una publicación existente a otro canal."
 metadata:
   author: r-bart
-  version: "0.11.1"
+  version: "0.12.0"
 ---
 
 # draft — Idea + canal → publicación
 
 ## Cuándo usar esta skill
 
-- Tienes una idea estructurada (en `projects/<slug>/ideas/<idea>.md`) y quieres convertirla en un draft publicable para un canal concreto.
+- Tienes una idea estructurada (en `audience-ops/ideas/<idea>.md`) y quieres convertirla en un draft publicable para un canal concreto.
 - Tienes una publicación existente y quieres **repurposear** su contenido a otro canal (la misma skill, modo `--from`).
 
 ## Entradas
 
 - **idea-slug**: el slug del fichero de idea (sin `.md`).
-- **channel**: id del canal destino (debe existir en `projects/<slug>/channels/<channel>.md`).
+- **channel**: id del canal destino (debe existir en `audience-ops/channels/<channel>.md`).
 - Opcional **--from `<publication-path>`**: ruta a una publicación ya existente que se quiere adaptar. Si se pasa, la idea-slug puede inferirse del frontmatter `idea:` de esa publicación.
 - Opcional **--to `<ch1,ch2,...>`** (requiere `--from`): lista comma-separated de canales destino para **batch repurpose**. Transforma la publicación origen de `--from` a cada uno de los canales destino en una sola invocación, generando un fichero por canal. Pre-flight: si algún canal listado no existe en el proyecto, abortar antes de generar nada. **`--to` sin `--from` es error**: el flujo single-channel desde una idea pelada se invoca como `draft <idea> <channel>` sin flags.
-- Opcional **slug del proyecto**. Si no, usar `defaults.project` de `config.yaml`. Si no, preguntar.
+El "proyecto" es implícitamente la instancia local (`./audience-ops/`). No hay slug ni selección.
 
 ## Lectura previa
 
 Antes de generar nada, leer:
 
-1. `projects/<slug>/voice.md` — voz y tono del proyecto.
-2. `projects/<slug>/channels/<channel>.md` — frontmatter (handle, cadencia) + formato + ajustes de voz por canal.
-3. `projects/<slug>/ideas/<idea-slug>.md` — frontmatter + hook + notas.
+1. `audience-ops/voice.md` — voz y tono del proyecto.
+2. `audience-ops/channels/<channel>.md` — frontmatter (handle, cadencia) + formato + ajustes de voz por canal.
+3. `audience-ops/ideas/<idea-slug>.md` — frontmatter + hook + notas.
 4. Si modo `--from`: la publicación origen.
-5. `projects/<slug>/strategy.md` — para conocer pilares y aplicar coherencia (no para generar el draft directamente).
+5. `audience-ops/strategy.md` — para conocer pilares y aplicar coherencia (no para generar el draft directamente).
 
 Si **alguna** de las tres primeras lecturas falla, abortar con mensaje claro al usuario (no improvisar).
 
@@ -40,7 +40,7 @@ Si **alguna** de las tres primeras lecturas falla, abortar con mensaje claro al 
 - Confirmar que el canal existe en `channels/`.
 - Confirmar que la idea existe en `ideas/`.
 - Si el frontmatter de la idea lista `channels:` y el canal solicitado no está → avisar al usuario (no es un error, pero merece la pena confirmar).
-- Si ya existe `projects/<slug>/publications/<idea>-<channel>.md`:
+- Si ya existe `audience-ops/publications/<idea>-<channel>.md`:
   - Mostrar al usuario lo que ya hay.
   - Preguntar: ¿sobreescribir, abandonar, o tratar esta invocación como **iteración** (modificar lo existente)?
 
@@ -94,7 +94,7 @@ Añadir campos específicos del canal:
 
 ### Paso 5 · Escribir el fichero
 
-Ruta: `projects/<slug>/publications/<idea-slug>-<channel>.md`.
+Ruta: `audience-ops/publications/<idea-slug>-<channel>.md`.
 
 Antes de escribir, mostrar al usuario:
 - Path completo.
@@ -145,7 +145,7 @@ Cuando se pasa `--to <ch1,ch2,...>` **junto con `--from <publication-path>`**: b
 ### Pre-flight
 
 1. Parsear la lista comma-separated en N canal-ids.
-2. Para cada `<channel>`, verificar que existe `projects/<slug>/channels/<channel>.md`. Si **alguno** falta, abortar listando los que faltan. Sin esto se genera basura.
+2. Para cada `<channel>`, verificar que existe `audience-ops/channels/<channel>.md`. Si **alguno** falta, abortar listando los que faltan. Sin esto se genera basura.
 3. Validar que ningún canal destino aparece duplicado (warning, no error).
 4. Leer la publicación origen una vez (vía `--from`).
 
@@ -154,7 +154,7 @@ Cuando se pasa `--to <ch1,ch2,...>` **junto con `--from <publication-path>`**: b
 Para cada canal destino, en orden de aparición:
 
 1. Ejecutar el flujo de generación de modo normal (lectura de voice + canal + idea + opcional origen → componer contexto → generar → mostrar → confirmar → escribir → review).
-2. Cada draft escribe `projects/<slug>/publications/<idea-slug>-<channel>.md`.
+2. Cada draft escribe `audience-ops/publications/<idea-slug>-<channel>.md`.
 3. Si el fichero ya existe, aplica el flujo existente "sobreescribir / iterar / abandonar" para ese canal individual. No se aplica blanket-yes para el batch.
 4. Si la review checklist falla en un canal individual, ese fichero queda como `draft` con notas; el siguiente canal sigue su curso sin verse afectado.
 
@@ -170,15 +170,15 @@ Tras el batch, renderizar tabla:
 
 | Canal destino | Resultado | Path |
 |---|---|---|
-| linkedin | ready | `projects/<slug>/publications/<idea>-linkedin.md` |
-| x | draft (review failed: subject) | `projects/<slug>/publications/<idea>-x.md` |
+| linkedin | ready | `audience-ops/publications/<idea>-linkedin.md` |
+| x | draft (review failed: subject) | `audience-ops/publications/<idea>-x.md` |
 | blog | rechazado por el usuario | (no escrito) |
 
 ## Escritura · Ficheros creados o modificados
 
 | Fichero | Acción |
 |---|---|
-| `projects/<slug>/publications/<idea-slug>-<channel>.md` | Crear (o sobreescribir/iterar tras confirmación) |
+| `audience-ops/publications/<idea-slug>-<channel>.md` | Crear (o sobreescribir/iterar tras confirmación) |
 
 ## Criterios de éxito
 

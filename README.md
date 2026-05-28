@@ -54,7 +54,7 @@ If you don't use markdown and don't have 2+ projects in flight, Notion or a sche
 2. **Skills as workflow.** No app; the conversation with the agent is the UI.
 3. **One source of truth per thing.** State in frontmatter, never in folders or in derivable files.
 4. **Regenerable views.** Calendar and indexes are computed on demand from data.
-5. **Multi-project native.** Even with one project, it lives under `projects/<slug>/`.
+5. **Single-instance per repo.** One audience-ops instance per host repo, namespaced under `audience-ops/`. Multi-project = installing the tool in multiple repos.
 6. **Project derived from path**, never duplicated in frontmatter.
 7. **Soft archive, never delete.** Move to `archive/`, never `rm`.
 8. **Zero magic.** Every action that writes files requires user confirmation.
@@ -74,27 +74,26 @@ If you don't use markdown and don't have 2+ projects in flight, Notion or a sche
 └── audience-ops-weekly/SKILL.md
 ```
 
-**Your content directory** (created by `/audience-ops-init`, lives in a repo of yours):
+**Your audience-ops instance** (created by `/audience-ops-init`, lives inside your project's repo):
 
 ```
-your-content-repo/
-├── portfolio.yaml        ← project index
-├── config.yaml           ← behavior defaults
-└── projects/
-    └── <slug>/
-        ├── strategy.md   ← positioning, ICP, pillars, goals
-        ├── voice.md      ← voice and tone
-        ├── channels/     ← one file per active channel (X, LinkedIn, newsletter, blog…)
-        │   ├── x.md
-        │   └── newsletter.md
-        ├── ideas/
-        │   ├── _inbox.md ← quick capture, append-only, dated lines
-        │   └── <slug>.md ← structured ideas
-        └── publications/ ← drafts + ready + published (state in frontmatter)
-            └── <idea>-<channel>.md
+your-product-repo/
+├── [your product code: src/, package.json, etc.]
+└── audience-ops/                       ← namespace fijo, una instancia por repo
+    ├── config.yaml                     ← behavior thresholds; no defaults.project
+    ├── strategy.md                     ← positioning, ICP, pillars, goals, anti-topics
+    ├── voice.md                        ← voice and tone
+    ├── channels/                       ← one file per active channel
+    │   ├── x.md
+    │   └── newsletter.md
+    ├── ideas/
+    │   ├── _inbox.md                   ← quick capture, append-only, dated lines
+    │   └── <slug>.md                   ← structured ideas
+    └── publications/                   ← drafts + ready + published (state in frontmatter)
+        └── <idea>-<channel>.md
 ```
 
-The two are **separate by design**: the skills are the tool, your content is yours. Don't put content inside the audience-ops repo.
+**Single-instance per repo by design.** The "project" is implicitly the host repo. Multi-project use = installing the tool in multiple repos. See SPEC §3 principle 7 for rationale. No `portfolio.yaml`, no `projects/<slug>/` nesting.
 
 ### Data model in 30 seconds
 
@@ -160,17 +159,19 @@ Audience Ops is designed primarily for use with **Claude Code**, but any markdow
 
 ### Day 1 · Bootstrap
 
-Run this **in the directory that will hold your content** — a fresh repo of yours, not inside `audience-ops/`:
+Run this **in your product repo** (or a dedicated content directory):
 
 ```
 /audience-ops-init
 ```
 
-Answer a short interview: your name, first project, positioning, voice, active channels. When done, you'll have:
+Answer a short interview: owner (if not set), strategy, voice, channels. When done, you'll have a self-contained `audience-ops/` folder inside the CWD:
 
-- `portfolio.yaml` with your first project.
-- `projects/<slug>/strategy.md`, `voice.md`, `channels/<id>.md` (one per channel).
-- An empty idea inbox ready for capture.
+- `audience-ops/config.yaml` — behavior thresholds.
+- `audience-ops/strategy.md`, `voice.md`, `channels/<id>.md` (one per channel).
+- An empty idea inbox ready for capture (`audience-ops/ideas/_inbox.md`).
+
+The "project" is implicitly this repo: no `portfolio.yaml`, no `projects/<slug>/` nesting, no slug interview. One instance per repo. For multi-project use, install the tool in another repo and run `init` there.
 
 `init` delegates the strategy interview to the `strategy` skill (see next section). Voice and channels are handled inline.
 
@@ -218,7 +219,7 @@ Reads the project's voice, the newsletter channel rules, and the idea's angle. G
 ### Repurpose · Adapt to another channel
 
 ```
-/audience-ops-draft cardio-rmssd x --from projects/verxion/publications/cardio-rmssd-newsletter.md
+/audience-ops-draft cardio-rmssd x --from audience-ops/publications/cardio-rmssd-newsletter.md
 ```
 
 Adapts an existing publication to a different channel without losing the angle. Not copy-paste — reformats according to the destination channel's rules.
@@ -245,13 +246,13 @@ Proposes archiving for old published items, abandoned drafts, killed ideas, paus
 
 ### Calendar consult · Ask for the view you need
 
-There is no `calendar.md` or `kanban.md` file. The state lives in each publication's frontmatter (`status`, `scheduled_for`), and any view is computed on demand by walking `projects/*/publications/*.md` (excluding `archive/`).
+There is no `calendar.md` or `kanban.md` file. The state lives in each publication's frontmatter (`status`, `scheduled_for`), and any view is computed on demand by walking `audience-ops/publications/*.md` (excluding `archive/`).
 
 If you only want to see the view without running the full `weekly` ritual, ask your agent directly:
 
 **By week** (calendar layout):
 
-> *"Show me publications with future `scheduled_for` in `projects/*/publications/`, grouped by ISO week."*
+> *"Show me publications with future `scheduled_for` in `audience-ops/publications/`, grouped by ISO week."*
 
 **By status** (kanban layout):
 
@@ -279,13 +280,14 @@ See [`AGENTS.md`](./AGENTS.md) for details.
 
 ## Current status
 
-**MVP shipped.** All 5 skills functional; v1.0.0 reserved for validation through real-content use.
+**MVP shipped + architecture simplified.** All 5 skills functional under the v0.12.0 single-instance-per-repo model. v1.0.0 reserved for validation through real-content use.
 
 - ✅ Phase 1 · Repo bootstrap.
 - ✅ Phase 2 · `.claude/skills/audience-ops-init/SKILL.md`.
 - ✅ Phase 3 · `.claude/skills/audience-ops-idea/SKILL.md` + `.claude/skills/audience-ops-draft/SKILL.md`.
 - ✅ Phase 5 · `.claude/skills/audience-ops-strategy/SKILL.md`.
 - ✅ Phase 6 · `.claude/skills/audience-ops-weekly/SKILL.md` (normal + `--cleanup` modes).
+- ✅ Phase 7 · v0.12.0 single-instance-per-repo refactor: killed `portfolio.yaml` + `projects/<slug>/` nesting; one `audience-ops/` namespace per host repo.
 
 See [`thoughts/plans/2026-05-21_audience-ops-mvp.md`](./thoughts/plans/2026-05-21_audience-ops-mvp.md) for the full plan and [`SPEC.md`](./SPEC.md) for the technical spec.
 

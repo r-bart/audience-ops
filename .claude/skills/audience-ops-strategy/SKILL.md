@@ -3,7 +3,7 @@ name: audience-ops-strategy
 description: "Interview para crear o actualizar el `strategy.md` de un proyecto (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
 metadata:
   author: r-bart
-  version: "0.11.1"
+  version: "0.12.0"
 ---
 
 # strategy — Crear o actualizar la estrategia de un proyecto
@@ -64,19 +64,19 @@ Mezclarlas en un fichero invalidaría `last_reviewed` cada vez que tocas una com
 
 ## Entradas
 
-- Opcional: slug del proyecto. Si no se da, usar `defaults.project` de `config.yaml`. Si tampoco, preguntar mostrando los activos de `portfolio.yaml`.
 - Opcional: bloque concreto a revisar (`positioning`, `icp`, `pillars`, `goals`, `anti-topics`). Si no se da, recorrer todos.
+
+El "proyecto" es implícitamente la instancia local (`./audience-ops/`).
 
 ## Lectura previa
 
 Antes de actuar, leer:
 
-1. `config.yaml` — para `defaults.project` y `strategy_review_months`.
-2. `portfolio.yaml` — para validar que el proyecto existe y leer su `one_liner` (contexto inicial del interview).
-3. `projects/<slug>/strategy.md` — si existe, para modo update.
-4. `projects/<slug>/publications/*.md` (excluir `archive/`) — leer las secciones `## Aprendizajes` agrupadas por pilar (vía `idea:` del frontmatter de publicación → `pillar:` del frontmatter de la idea) para el modo update de bloque 3.3.
+1. `audience-ops/config.yaml` — para `strategy_review_months`.
+2. `audience-ops/strategy.md` — si existe, para modo update.
+3. `audience-ops/publications/*.md` (excluir `archive/`) — leer las secciones `## Aprendizajes` agrupadas por pilar (vía `idea:` del frontmatter de publicación → `pillar:` del frontmatter de la idea) para el modo update de bloque 2.3.
 
-Si **no existe** `projects/<slug>/strategy.md` y tampoco el directorio del proyecto: abortar y sugerir `/audience-ops-init`.
+Si **no existe** `audience-ops/`: abortar y sugerir `/audience-ops-init`.
 
 ## Detección de modo
 
@@ -85,13 +85,7 @@ Si **no existe** `projects/<slug>/strategy.md` y tampoco el directorio del proye
 
 ## Pasos
 
-### Paso 1 · Determinar proyecto
-
-- Si el usuario indicó proyecto → usar.
-- Si no, `defaults.project` de `config.yaml`.
-- Si no hay default → preguntar listando proyectos activos de `portfolio.yaml`.
-
-### Paso 2 · Comprobar staleness (solo modo update)
+### Paso 1 · Comprobar staleness (solo modo update)
 
 Si existe `strategy.md` con frontmatter `last_reviewed`:
 
@@ -99,11 +93,11 @@ Si existe `strategy.md` con frontmatter `last_reviewed`:
 - Si pasa de `strategy_review_months` (default 4): avisar al usuario antes de empezar ("Última revisión hace X meses, igual conviene mirarla entera").
 - Si no, ofrecer modo bloque-específico ("¿Revisar todo, o solo `pillars`/`goals`/`anti-topics`?").
 
-### Paso 3 · Interview por bloques
+### Paso 2 · Interview por bloques
 
 Para cada bloque, en este orden:
 
-#### 3.1 · Posicionamiento
+#### 2.1 · Posicionamiento
 
 Pregunta guía: "En una frase, ¿qué es este proyecto y para quién?"
 
@@ -114,7 +108,7 @@ Refinamiento:
 
 Si en modo update, mostrar lo que hay y pedir: mantener / refinar / reescribir / saltar.
 
-#### 3.2 · Audiencia / ICP
+#### 2.2 · Audiencia / ICP
 
 > Ver "Conceptos clave · ICP" si el término no te dice nada. Bottom line: lector ideal con detalle concreto.
 
@@ -126,7 +120,7 @@ Refinamiento:
 - Qué ya ha probado y no le funcionó.
 - Dónde lee actualmente (canales que ya consume).
 
-#### 3.3 · Pilares
+#### 2.3 · Pilares
 
 Pregunta guía: "¿Sobre qué 3 temas vas a escribir sistemáticamente?"
 
@@ -139,8 +133,8 @@ Si en modo update, mostrar pilares actuales y permitir añadir / eliminar / reno
 
 **En modo update, antes de iterar cada pilar**:
 
-1. Recorrer `projects/<slug>/publications/*.md` (excluyendo `archive/`).
-2. Para cada publicación, leer su `idea:` del frontmatter y buscar el fichero de idea correspondiente en `projects/<slug>/ideas/<idea-slug>.md`. Si la idea existe y su frontmatter tiene `pillar: <este-pilar>`, extraer los bullets de la sección `## Aprendizajes` de la publicación si existe.
+1. Recorrer `audience-ops/publications/*.md` (excluyendo `archive/`).
+2. Para cada publicación, leer su `idea:` del frontmatter y buscar el fichero de idea correspondiente en `audience-ops/ideas/<idea-slug>.md`. Si la idea existe y su frontmatter tiene `pillar: <este-pilar>`, extraer los bullets de la sección `## Aprendizajes` de la publicación si existe.
 3. Tomar las **3-5 más recientes por `scheduled_for`** del frontmatter de cada publicación (fecha de publicación, no de edición). Mostrarlas como contexto:
 
 ```
@@ -170,18 +164,18 @@ Si **no hay aprendizajes** registrados en ese pilar:
 
 Y el flujo sigue al sub-interview normal del pilar sin contexto extra. Nunca bloquea el interview.
 
-**Huérfanos**: si una publicación con `## Aprendizajes` referencia una idea que ya no existe (movida a `ideas/archive/`, eliminada, o el slug fue renombrado) — entonces no se puede mapear al pilar y los bullets se pierden de las vistas agrupadas. Al final de la fase 3 de strategy, **listar los huérfanos** una sola vez como warning:
+**Huérfanos**: si una publicación con `## Aprendizajes` referencia una idea que ya no existe (movida a `ideas/archive/`, eliminada, o el slug fue renombrado) — entonces no se puede mapear al pilar y los bullets se pierden de las vistas agrupadas. Al final de Paso 2 de strategy, **listar los huérfanos** una sola vez como warning:
 
 ```
 ⚠ Publicaciones con aprendizajes pero idea no encontrada (huérfanas):
-- projects/<slug>/publications/cardio-rmssd-newsletter.md → idea `cardio-rmssd` no existe (¿archivada o renombrada?)
+- audience-ops/publications/cardio-rmssd-newsletter.md → idea `cardio-rmssd` no existe (¿archivada o renombrada?)
 ```
 
 No bloquea el flujo; solo informa.
 
 **Importante**: el frontmatter de la idea (`pillar:`) y de la publicación referencian estos slugs. Cambiar un slug = inconsistencia con ideas previas. Si el usuario renombra un pilar, avisar de que las ideas/publicaciones existentes con ese pilar quedarán "huérfanas" hasta que se actualicen (no es un error de skill, es una decisión del usuario).
 
-#### 3.4 · Objetivos
+#### 2.4 · Objetivos
 
 > No son OKRs (ver "Conceptos clave · Objetivos ≠ OKRs"). Son intenciones con número: `<periodo>: <métrica concreta>`. Opcional dejarlo en `_pendiente_`.
 
@@ -193,7 +187,7 @@ Aceptar lista libre. Sugerencias de formato:
 
 Si el usuario no tiene objetivos claros: dejar la sección con un placeholder (`_pendiente_`) y avisar.
 
-#### 3.5 · Anti-temas
+#### 2.5 · Anti-temas
 
 Pregunta guía: "¿Qué NO vas a escribir, aunque venga la tentación?"
 
@@ -204,13 +198,12 @@ Sugerencias:
 
 Anti-temas son frontera, no aspiración. Si el usuario duda, dejar vacío en lugar de inventar.
 
-### Paso 4 · Construir el contenido
+### Paso 3 · Construir el contenido
 
-Componer `projects/<slug>/strategy.md`:
+Componer `audience-ops/strategy.md`:
 
 ```markdown
 ---
-slug: <slug>
 last_reviewed: <YYYY-MM-DD de hoy>
 pillars:
   - <pillar-slug-1>
@@ -220,11 +213,11 @@ pillars:
 
 ## Posicionamiento
 
-<contenido del bloque 3.1>
+<contenido del bloque 2.1>
 
 ## Audiencia / ICP
 
-<contenido del bloque 3.2>
+<contenido del bloque 2.2>
 
 ## Pilares
 
@@ -248,17 +241,17 @@ pillars:
 - <anti-tema 2>
 ```
 
-### Paso 5 · Mostrar diff y confirmar
+### Paso 4 · Mostrar diff y confirmar
 
 - Modo create: mostrar el contenido completo y pedir confirmación antes de escribir.
 - Modo update: mostrar diff (qué bloques cambiaron, qué se mantiene). Confirmar antes de escribir.
 
-### Paso 6 · Escribir y actualizar `last_reviewed`
+### Paso 5 · Escribir y actualizar `last_reviewed`
 
-- Escribir `projects/<slug>/strategy.md`.
+- Escribir `audience-ops/strategy.md`.
 - `last_reviewed: <hoy>` siempre se actualiza tras una edición confirmada, incluso si solo se tocó un bloque.
 
-### Paso 7 · Resumen final
+### Paso 6 · Resumen final
 
 Mostrar al usuario:
 
@@ -271,18 +264,18 @@ Mostrar al usuario:
 
 | Fichero | Acción |
 |---|---|
-| `projects/<slug>/strategy.md` | Crear (modo create) o reescribir (modo update) tras confirmación |
+| `audience-ops/strategy.md` | Crear (modo create) o reescribir (modo update) tras confirmación |
 
 ## Criterios de éxito
 
-- `strategy.md` existe con frontmatter (`slug`, `pillars`, `last_reviewed: hoy`).
+- `audience-ops/strategy.md` existe con frontmatter (`pillars`, `last_reviewed: hoy`). **Sin** `slug:` (el proyecto se deriva del repo host).
 - Las 5 secciones (`Posicionamiento`, `Audiencia / ICP`, `Pilares`, `Objetivos`, `Anti-temas`) están presentes (aunque alguna esté con `_pendiente_`).
 - Cada pilar listado en el frontmatter tiene su correspondiente `### <slug>` en la sección Pilares con descripción.
 - El usuario confirmó la escritura.
 
 ## Errores y casos límite
 
-- **No existe el proyecto** (`projects/<slug>/` ausente): abortar, sugerir `/audience-ops-init <slug>` antes.
+- **`audience-ops/` no existe**: abortar, sugerir `/audience-ops-init`.
 - **`strategy.md` está corrupto** (frontmatter inválido, etc.): mostrar lo que se ve, ofrecer reescribir de cero (modo create efectivo) o que el usuario lo arregle a mano.
 - **Pilar slug colisiona** con uno existente: si el usuario añade un pilar nuevo con el mismo slug que otro, advertir y pedir desambiguar.
 - **El usuario quiere dejar todo en `_pendiente_`**: permitir, pero advertir que `idea --promote` y `draft` tratarán como "sin restricciones" — la skill no falla, el usuario sabe que va a ciegas.
@@ -293,6 +286,6 @@ Mostrar al usuario:
 
 - **Cero magia.** Confirmación antes de escribir. Diff visible en modo update.
 - **Una sola fuente de verdad por cosa.** Los pilares viven en el frontmatter de `strategy.md` (canónico) + descripción en el cuerpo. Las ideas referencian por slug.
-- **Frontmatter mínimo.** Solo `slug`, `pillars`, `last_reviewed`. El resto en prosa con H2s.
-- **El proyecto se deriva del path.** El fichero acaba en `projects/<slug>/`, no se duplica.
-- **Soft archive desde el inicio.** Si el usuario pide "olvidar" la estrategia entera (poco común), mover a `projects/<slug>/archive/strategy-YYYY-MM-DD.md` siguiendo la convención `archive/` del repo, en lugar de borrar o renombrar adyacente.
+- **Frontmatter mínimo.** Solo `pillars` y `last_reviewed`. Sin `slug` (el proyecto es el repo host). El resto en prosa con H2s.
+- **Single-instance por repo.** El fichero acaba en `audience-ops/`, una instancia por repo.
+- **Soft archive desde el inicio.** Si el usuario pide "olvidar" la estrategia entera (poco común), mover a `audience-ops/archive/strategy-YYYY-MM-DD.md` siguiendo la convención `archive/` del repo, en lugar de borrar o renombrar adyacente.
