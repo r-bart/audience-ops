@@ -3,7 +3,7 @@ name: audience-ops-strategy
 description: "Interview para crear o actualizar el `strategy.md` de un proyecto (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
 metadata:
   author: r-bart
-  version: "0.10.1"
+  version: "0.10.2"
 ---
 
 # strategy — Crear o actualizar la estrategia de un proyecto
@@ -14,7 +14,51 @@ metadata:
 - Quieres revisar / actualizar una estrategia existente: el contexto cambió, los pilares ya no encajan, los objetivos del trimestre son otros.
 - `weekly --cleanup` te avisó de que `last_reviewed` lleva más de `strategy_review_months` (default 4) sin tocarse.
 
-Esta skill **no toca** `voice.md` ni los canales — son ficheros separados.
+Esta skill **no toca** `voice.md` ni los canales — son ficheros separados (ver "Conceptos clave" abajo).
+
+## Conceptos clave
+
+Antes del interview, contexto sobre los términos que aparecen — todos son fuente común de fricción para quien empieza.
+
+### ICP (*Ideal Customer Profile*)
+
+El lector exacto al que escribes. No vale "developers" ni "gente que entrena"; vale algo concreto como "senior backend engineer en startup de 10-50 personas que escribe Go a diario y nunca ha tocado React" o "atleta amateur 30-40 años con wearable, frustrada porque sus métricas no se traducen en mejor planificación".
+
+Es jerga prestada de B2B sales. Si te incomoda el término, mentalmente sustitúyelo por "lector ideal". El skill fuerza esta precisión porque la ambigüedad aquí se propaga: `idea --promote` necesita decidir si una idea encaja con el ICP, `draft` necesita escribir con un lector concreto en la cabeza, y "gente que entrena" no es lo bastante específico para dirigir un ángulo.
+
+### Objetivos ≠ OKRs
+
+Son **intenciones con número**, no la metodología OKR formal. No hace falta jerarquía objetivo/key-result, ni 3-5 de cada, ni revisión cuantitativa rigurosa. Formato sugerido y suficiente:
+
+```
+<periodo>: <métrica concreta>
+```
+
+Ejemplos:
+- "Q3 2026: 12 newsletters publicadas, 200 suscriptores nuevos."
+- "H1 2027: 5 piezas long-form, posicionar para 'HRV training'."
+
+Sirven para dos cosas: (a) que `weekly` contraste tu actividad real con la cadencia que dijiste querer, (b) que cuando revises la estrategia a los 4 meses, decidas si los pilares siguen aportando hacia esos objetivos. Si no quieres meterte en esto, déjalo en `_pendiente_` (ver siguiente punto).
+
+### Estructural vs contenido — qué es opcional
+
+Las 5 secciones (Posicionamiento, Audiencia/ICP, Pilares, Objetivos, Anti-temas) son **estructuralmente obligatorias**: todas existen en `strategy.md` siempre, aunque sea con un placeholder. El **contenido de cada sección es opcional**: puedes dejar `_pendiente_` y refinar después en otra invocación de `strategy`.
+
+Excepción práctica: **Pilares** sin al menos uno deja a `idea --promote` y `draft` operando a ciegas (sin lista contra la que validar el `pillar:` de cada idea). El skill te deja seguir sin pilares pero te avisa.
+
+Por qué la estructura es fija (principio "Convención sobre configuración" del SPEC): cualquier skill o agente puede ir a buscar "## Objetivos" en cualquier `strategy.md` y saber que estará — aunque esté vacía. Cero adivinanza estructural.
+
+### Por qué no se toca `voice.md` ni canales
+
+Estrategia y voz son **ortogonales**:
+
+| | Estrategia | Voz |
+|---|---|---|
+| Pregunta que responde | **Qué** cuentas y **a quién** | **Cómo** lo cuentas |
+| Cambia cuando | El ICP cambia o sumas pilar | Casi nunca; tu voz es tuya |
+| Entre proyectos | Estrategia única por proyecto | Misma voz puede aplicar a varios |
+
+Mezclarlas en un fichero invalidaría `last_reviewed` cada vez que tocas una coma de la voz (y al revés). Canales son otra dimensión más (formato + cadencia + ajustes de voz por plataforma) y viven en `channels/<id>.md`. Una skill = un concepto. La voz se edita a mano hoy; `voice.md` es corto.
 
 ## Entradas
 
@@ -69,6 +113,8 @@ Si en modo update, mostrar lo que hay y pedir: mantener / refinar / reescribir /
 
 #### 3.2 · Audiencia / ICP
 
+> Ver "Conceptos clave · ICP" si el término no te dice nada. Bottom line: lector ideal con detalle concreto.
+
 Pregunta guía: "¿Quién es el lector ideal? Descríbelo concreto."
 
 Refinamiento:
@@ -91,6 +137,8 @@ Si en modo update, mostrar pilares actuales y permitir añadir / eliminar / reno
 **Importante**: el frontmatter de la idea (`pillar:`) y de la publicación referencian estos slugs. Cambiar un slug = inconsistencia con ideas previas. Si el usuario renombra un pilar, avisar de que las ideas/publicaciones existentes con ese pilar quedarán "huérfanas" hasta que se actualicen (no es un error de skill, es una decisión del usuario).
 
 #### 3.4 · Objetivos
+
+> No son OKRs (ver "Conceptos clave · Objetivos ≠ OKRs"). Son intenciones con número: `<periodo>: <métrica concreta>`. Opcional dejarlo en `_pendiente_`.
 
 Pregunta guía: "¿Qué quieres conseguir con este pilar de contenido en el siguiente trimestre / semestre?"
 
