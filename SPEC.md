@@ -195,7 +195,7 @@ Frontmatter minimalista: solo lo que las skills necesitan parsear (`pillars`, `l
 - preguntas retóricas como hook
 
 ## Referencias
-- escribe como [autor X], no como [autor Y]
+- escribe como Paul Graham, no como Gary Vee
 ```
 
 ### `projects/<slug>/channels/<id>.md`

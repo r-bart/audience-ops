@@ -3,7 +3,7 @@ name: audience-ops-weekly
 description: "Ritual semanal del operating system de contenidos: triage del inbox, vista de calendario, hygiene continua. Modo `--cleanup` para limpieza trimestral (archivado de publicadas viejas, drafts abandonados, ideas killed, proyectos paused)."
 metadata:
   author: r-bart
-  version: "0.11.0"
+  version: "0.11.1"
 ---
 
 # weekly — Ritual semanal + cleanup trimestral
@@ -245,7 +245,8 @@ Mostrar conteos: N publicaciones archivadas, M drafts abandonados, K ideas kille
 
 - **No hay proyectos** en `portfolio.yaml`: avisar, sugerir `/audience-ops-init`.
 - **Una publicación tiene frontmatter inválido** (yaml roto, `status` desconocido): mostrar al usuario el fichero, no intentar reparar; tratarla como "skipped" en este ritual.
-- **`config.yaml` sin umbrales**: usar los defaults documentados aquí (30 / 30 / 90 / 4 / 6) y avisar al usuario una vez ("usando defaults; ajústalos en `config.yaml` si quieres").
+- **`config.yaml` sin umbrales o flags**: usar los defaults documentados aquí (`stale_draft_days: 30`, `stale_inbox_days: 30`, `cleanup_threshold_days: 90`, `strategy_review_months: 4`, `paused_archive_threshold_months: 6`, `learnings_prompt_threshold_days: 60`, `prompt_learnings_on_publish: true`) y avisar al usuario una vez ("usando defaults; ajústalos en `config.yaml` si quieres").
+- **Múltiples secciones `## Aprendizajes` en un mismo fichero de publicación** (caso raro por edit manual): consolidar bajo la **primera** sección y avisar al usuario ("publication X tenía 2+ secciones `## Aprendizajes`; bullets nuevos van a la primera, recomiendo consolidar a mano"). No reordenar ni borrar las secciones duplicadas — el usuario decide cómo consolidar.
 - **Conflicto de slot** (dos publicaciones mismo canal misma fecha): avisar, no resolver automáticamente — el usuario decide cuál mueve.
 - **El usuario corta el ritual a mitad**: los cambios ya confirmados quedan aplicados. Lo no triageado vuelve a aparecer la próxima vez. Cero estado intermedio.
 - **`archive/` ya existe con estructura distinta** (ej. fichero llamado `archive` en lugar de carpeta): avisar, no sobreescribir.

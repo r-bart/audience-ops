@@ -3,7 +3,7 @@ name: audience-ops-strategy
 description: "Interview para crear o actualizar el `strategy.md` de un proyecto (posicionamiento, ICP, pilares, objetivos, anti-temas). Avisa si `last_reviewed` lleva más del umbral configurado."
 metadata:
   author: r-bart
-  version: "0.11.0"
+  version: "0.11.1"
 ---
 
 # strategy — Crear o actualizar la estrategia de un proyecto
@@ -140,15 +140,19 @@ Si en modo update, mostrar pilares actuales y permitir añadir / eliminar / reno
 **En modo update, antes de iterar cada pilar**:
 
 1. Recorrer `projects/<slug>/publications/*.md` (excluyendo `archive/`).
-2. Para publicaciones cuyo `idea:` apunta a una idea con `pillar: <este-pilar>` en su frontmatter, extraer los bullets de la sección `## Aprendizajes` si existe.
-3. Tomar las **3-5 más recientes por mtime** (proxy del orden cronológico) y mostrarlas como contexto:
+2. Para cada publicación, leer su `idea:` del frontmatter y buscar el fichero de idea correspondiente en `projects/<slug>/ideas/<idea-slug>.md`. Si la idea existe y su frontmatter tiene `pillar: <este-pilar>`, extraer los bullets de la sección `## Aprendizajes` de la publicación si existe.
+3. Tomar las **3-5 más recientes por `scheduled_for`** del frontmatter de cada publicación (fecha de publicación, no de edición). Mostrarlas como contexto:
 
 ```
-📒 Aprendizajes recientes del pilar `<pillar-slug>`:
-- "El hook con dato concreto funcionó mejor que el ángulo personal." (cardio-rmssd-newsletter)
-- "Subject line tenía 53 chars — algunos clientes lo cortaron." (cardio-rmssd-newsletter)
-- "Una respuesta tardía: @user preguntó si esto aplica a Zone 2." (cardio-rmssd-newsletter)
+Aprendizajes recientes del pilar `<pillar-slug>`:
+- "El hook con dato concreto funcionó mejor que el ángulo personal." (cardio-rmssd-newsletter, 2026-04-02)
+- "Subject line tenía 53 chars — algunos clientes lo cortaron." (cardio-rmssd-newsletter, 2026-04-02)
+- "Una respuesta tardía: @user preguntó si esto aplica a Zone 2." (cardio-rmssd-newsletter, 2026-04-02)
 ```
+
+Por qué `scheduled_for` y no `mtime`: las publicaciones reciben aprendizajes a lo largo del tiempo (3b en weekly normal, paso 6 en cleanup) — eso modifica el mtime sin cambiar la fecha de publicación. Ordenar por mtime mostraría "recientes" que son aprendizajes anotados retroactivamente sobre publicaciones antiguas. `scheduled_for` es la fecha real.
+
+Si una publicación tiene aprendizajes pero **no tiene `scheduled_for`** (estado corrupto: aprendizajes sin status published consistente), incluirla al final del grupo y avisar al usuario ("(publicación sin scheduled_for; revisar)").
 
 4. Preguntar al usuario:
 
@@ -161,10 +165,19 @@ Si en modo update, mostrar pilares actuales y permitir añadir / eliminar / reno
 Si **no hay aprendizajes** registrados en ese pilar:
 
 ```
-📒 (no hay aprendizajes registrados todavía para este pilar)
+(no hay aprendizajes registrados todavía para este pilar)
 ```
 
 Y el flujo sigue al sub-interview normal del pilar sin contexto extra. Nunca bloquea el interview.
+
+**Huérfanos**: si una publicación con `## Aprendizajes` referencia una idea que ya no existe (movida a `ideas/archive/`, eliminada, o el slug fue renombrado) — entonces no se puede mapear al pilar y los bullets se pierden de las vistas agrupadas. Al final de la fase 3 de strategy, **listar los huérfanos** una sola vez como warning:
+
+```
+⚠ Publicaciones con aprendizajes pero idea no encontrada (huérfanas):
+- projects/<slug>/publications/cardio-rmssd-newsletter.md → idea `cardio-rmssd` no existe (¿archivada o renombrada?)
+```
+
+No bloquea el flujo; solo informa.
 
 **Importante**: el frontmatter de la idea (`pillar:`) y de la publicación referencian estos slugs. Cambiar un slug = inconsistencia con ideas previas. Si el usuario renombra un pilar, avisar de que las ideas/publicaciones existentes con ese pilar quedarán "huérfanas" hasta que se actualicen (no es un error de skill, es una decisión del usuario).
 

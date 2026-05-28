@@ -3,7 +3,7 @@ name: audience-ops-init
 description: "Bootstrap del repo Audience Ops (si está vacío) o añade un nuevo proyecto. Encadena la creación de estructura, estrategia, voz y canales en un flujo guiado."
 metadata:
   author: r-bart
-  version: "0.11.0"
+  version: "0.11.1"
 ---
 
 # init — Bootstrap del repo + primer proyecto
@@ -181,7 +181,7 @@ Antes de preguntar, mostrar al usuario los **ejemplos canónicos** (lift directo
 - preguntas retóricas como hook
 
 ## Referencias
-- escribe como [autor X], no como [autor Y]
+- escribe como Paul Graham, no como Gary Vee
 ```
 
 Preguntar al usuario por:

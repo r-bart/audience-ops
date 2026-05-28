@@ -3,7 +3,7 @@ name: audience-ops-draft
 description: "Convierte una idea estructurada en un draft listo para un canal concreto. Aplica voz, formato del canal y ángulo de la idea. Soporta repurpose de una publicación existente a otro canal."
 metadata:
   author: r-bart
-  version: "0.11.0"
+  version: "0.11.1"
 ---
 
 # draft — Idea + canal → publicación
@@ -18,7 +18,7 @@ metadata:
 - **idea-slug**: el slug del fichero de idea (sin `.md`).
 - **channel**: id del canal destino (debe existir en `projects/<slug>/channels/<channel>.md`).
 - Opcional **--from `<publication-path>`**: ruta a una publicación ya existente que se quiere adaptar. Si se pasa, la idea-slug puede inferirse del frontmatter `idea:` de esa publicación.
-- Opcional **--to `<ch1,ch2,...>`**: lista comma-separated de canales destino para **batch repurpose**. Cuando se usa con `--from`, transforma la publicación origen a cada uno de los canales destino en una sola invocación, generando un fichero por canal. Sin `--from`, batch desde una idea pelada (mismo behavior, N drafts en una invocación). Pre-flight: si algún canal listado no existe en el proyecto, abortar antes de generar nada.
+- Opcional **--to `<ch1,ch2,...>`** (requiere `--from`): lista comma-separated de canales destino para **batch repurpose**. Transforma la publicación origen de `--from` a cada uno de los canales destino en una sola invocación, generando un fichero por canal. Pre-flight: si algún canal listado no existe en el proyecto, abortar antes de generar nada. **`--to` sin `--from` es error**: el flujo single-channel desde una idea pelada se invoca como `draft <idea> <channel>` sin flags.
 - Opcional **slug del proyecto**. Si no, usar `defaults.project` de `config.yaml`. Si no, preguntar.
 
 ## Lectura previa
@@ -138,14 +138,16 @@ Cuando se pasa `--from <publication-path>`:
 
 ## Modo batch (`--to`)
 
-Cuando se pasa `--to <ch1,ch2,...>` (combinable con `--from`):
+Cuando se pasa `--to <ch1,ch2,...>` **junto con `--from <publication-path>`**: batch repurpose de una publicación origen a N canales destino en una sola invocación.
+
+`--to` sin `--from` no está soportado en v0.11.x (ver "Errores y casos límite"). Para draftear una idea desde cero a varios canales, hoy se invoca `draft` una vez por canal.
 
 ### Pre-flight
 
 1. Parsear la lista comma-separated en N canal-ids.
 2. Para cada `<channel>`, verificar que existe `projects/<slug>/channels/<channel>.md`. Si **alguno** falta, abortar listando los que faltan. Sin esto se genera basura.
 3. Validar que ningún canal destino aparece duplicado (warning, no error).
-4. Si `--from` también se pasa: leer la publicación origen una vez. Si no, leer la idea y proceder como modo normal × N.
+4. Leer la publicación origen una vez (vía `--from`).
 
 ### Generación secuencial
 
@@ -194,9 +196,10 @@ Tras el batch, renderizar tabla:
 - **Newsletter sin generar `subject` válido** (>50 chars): no marcar `ready`. Pedir al usuario que afine o regenerar.
 - **Repurpose desde un canal muy distinto** (ej. newsletter → X): si la longitud no entra, ofrecer dividir en varias publicaciones (no asumir).
 - **El draft generado contiene "anti-temas"** listados en `strategy.md`: detectar y avisar antes de escribir.
+- **Modo `--to` sin `--from`**: error con mensaje "`--to` requiere `--from <publication-path>`. Para draftear una idea a varios canales desde cero, invoca `draft <idea> <channel>` una vez por canal." No generar nada.
 - **Modo `--to` con canal inexistente**: pre-flight aborta listando todos los canales faltantes. No se genera nada.
-- **Modo `--to` con un solo canal**: behavior idéntico a modo single-channel; el flag se acepta por simetría.
-- **Modo `--to` mezclado con `--from <publication-path>` cuyo canal está en la lista**: warning de regeneración del origen, permitir con confirmación explícita.
+- **Modo `--to` con un solo canal**: behavior idéntico a modo single-channel `--from`; el flag se acepta por simetría.
+- **Modo `--to` cuyo lista incluye el canal del origen `--from`**: warning de regeneración del origen, permitir con confirmación explícita.
 - **Modo `--to` con interrupt mid-batch**: los drafts confirmados quedan escritos; el resto se omite; resumen lista lo completado.
 
 ## Principios que aplica

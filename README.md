@@ -233,6 +233,7 @@ Adapts an existing publication to a different channel without losing the angle. 
 - Global calendar view with slot conflicts and per-channel summary.
 - Hygiene: stale drafts, overdue ready items, old inbox entries.
 - Decide which ideas move to draft this week.
+- When you confirm a `ready → published` transition, weekly asks for a quick qualitative recap ("what worked, what didn't") and appends a `## Aprendizajes` section to the publication file. Skippable. The `strategy` skill reads these per pillar later to surface what real use is teaching you. Suppress globally via `prompt_learnings_on_publish: false` in `config.yaml`.
 
 ### Quarterly cleanup · Archive sweep
 
