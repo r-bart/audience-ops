@@ -60,26 +60,27 @@ If you don't use markdown and don't have 2+ projects in flight, Notion or a sche
 8. **Zero magic.** Every action that writes files requires user confirmation.
 9. **Agent-agnostic.** Skills are pure markdown playbooks; any markdown-capable agent can run them.
 
-### Repo structure
+### Layout
+
+**The skills** (installed via `npx skills add` — see [Install](#install)):
 
 ```
-audience-ops/
-├── README.md             ← this file
-├── AGENTS.md             ← how any agent operates the system
-├── SPEC.md               ← full technical spec
+~/.claude/skills/                       ← global (with -g)
+  or ./.claude/skills/                  ← per-project (without -g)
+├── audience-ops-init/SKILL.md
+├── audience-ops-idea/SKILL.md
+├── audience-ops-draft/SKILL.md
+├── audience-ops-strategy/SKILL.md   (pending)
+└── audience-ops-weekly/SKILL.md     (pending)
+```
+
+**Your content directory** (created by `/audience-ops-init`, lives in a repo of yours):
+
+```
+your-content-repo/
 ├── portfolio.yaml        ← project index
 ├── config.yaml           ← behavior defaults
-│
-├── .claude/              ← Claude Code glue
-│   ├── settings.json
-│   └── skills/           ← the agent-agnostic markdown playbooks (SKILL.md per skill)
-│       ├── audience-ops-init/SKILL.md
-│       ├── audience-ops-idea/SKILL.md
-│       ├── audience-ops-draft/SKILL.md
-│       ├── audience-ops-strategy/SKILL.md   (pending)
-│       └── audience-ops-weekly/SKILL.md     (pending)
-│
-└── projects/             ← one subdirectory per project
+└── projects/
     └── <slug>/
         ├── strategy.md   ← positioning, ICP, pillars, goals
         ├── voice.md      ← voice and tone
@@ -92,6 +93,8 @@ audience-ops/
         └── publications/ ← drafts + ready + published (state in frontmatter)
             └── <idea>-<channel>.md
 ```
+
+The two are **separate by design**: the skills are the tool, your content is yours. Don't put content inside the audience-ops repo.
 
 ### Data model in 30 seconds
 
@@ -136,24 +139,28 @@ All with confirmation. Zero automatic archiving.
 
 ### Install
 
-Two paths:
-
-**Via [skills.sh](https://skills.sh)** (Claude Code, Cursor, Codex, and 50+ agents supported):
+Install the skills via [skills.sh](https://skills.sh) (works with Claude Code, Cursor, Codex, and 50+ agents):
 
 ```bash
-npx skills add r-bart/audience-ops
+# Global — recommended for multi-project use
+npx skills add r-bart/audience-ops -g
 ```
 
-**Or clone the template directly**:
+Drop the `-g` if you want the skills committed alongside your content (installed to `./.claude/skills/` in the current directory, pinned to one version).
 
-```bash
-git clone https://github.com/r-bart/audience-ops.git
-cd audience-ops
-```
+> **Reading the source or contributing?**
+>
+> ```bash
+> git clone https://github.com/r-bart/audience-ops.git
+> ```
+>
+> Don't use the clone as your content workspace — content lives in a separate repo (see [Layout](#layout)).
 
 Audience Ops is designed primarily for use with **Claude Code**, but any markdown-capable agent can run the skills (see `AGENTS.md`).
 
 ### Day 1 · Bootstrap
+
+Run this **in the directory that will hold your content** — a fresh repo of yours, not inside `audience-ops/`:
 
 ```
 /audience-ops-init
@@ -181,7 +188,7 @@ Quick mode: appends one line to the active project's `_inbox.md` with today's da
 
 Promote mode: asks for pillar, target channels, hook, and creates a structured file at `ideas/<slug>.md`. The original inbox line gets marked with a `→ ideas/<slug>.md` suffix for traceability.
 
-### Turn an idea into a draft
+### Drafting · Idea + channel
 
 ```
 /audience-ops-draft cardio-rmssd newsletter
@@ -189,7 +196,7 @@ Promote mode: asks for pillar, target channels, hook, and creates a structured f
 
 Reads the project's voice, the newsletter channel rules, and the idea's angle. Generates a draft with `subject`, `preheader`, and body. Shows it to you, writes it on confirmation, then runs a review checklist: if it passes, marks `status: ready`; otherwise stays `draft` with notes on what's missing.
 
-### Repurpose
+### Repurpose · Adapt to another channel
 
 ```
 /audience-ops-draft cardio-rmssd x --from projects/verxion/publications/cardio-rmssd-newsletter.md
@@ -197,7 +204,7 @@ Reads the project's voice, the newsletter channel rules, and the idea's angle. G
 
 Adapts an existing publication to a different channel without losing the angle. Not copy-paste — reformats according to the destination channel's rules.
 
-### Weekly ritual *(pending, Phase 6)*
+### Weekly ritual · Triage & calendar *(pending, Phase 6)*
 
 ```
 /audience-ops-weekly
@@ -208,7 +215,7 @@ Adapts an existing publication to a different channel without losing the angle. 
 - Hygiene: stale drafts, overdue ready items, old inbox entries.
 - Decide which ideas move to draft this week.
 
-### Quarterly cleanup *(pending, Phase 6)*
+### Quarterly cleanup · Archive sweep *(pending, Phase 6)*
 
 ```
 /audience-ops-weekly --cleanup
@@ -216,7 +223,7 @@ Adapts an existing publication to a different channel without losing the angle. 
 
 Proposes archiving for old published items, abandoned drafts, killed ideas, paused projects. All with confirmation.
 
-### Publishing
+### Publishing · Manual handoff
 
 Audience Ops **does not publish**. When a publication reaches `status: ready`, open the file, copy the contents into Typefully (or whatever you use), schedule. On the next `weekly` you confirm the transition to `published`.
 
@@ -224,7 +231,7 @@ Audience Ops **does not publish**. When a publication reaches `status: ready`, o
 
 ## Agent compatibility
 
-Skills are pure markdown playbooks. They work with:
+Works with:
 
 - **Claude Code** — skills autodiscovered from `.claude/skills/<slug>/SKILL.md`. Natural invocation with `/audience-ops-<skill>` (kebab-case; the `:` syntax is reserved for plugin-packaged skills).
 - **Cursor / Aider / Codex / others** — point at the file: *"follow the instructions in `.claude/skills/audience-ops-draft/SKILL.md` with this idea and this channel"*.
