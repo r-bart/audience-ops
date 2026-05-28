@@ -1,6 +1,9 @@
 ---
 name: audience-ops-draft
 description: Convierte una idea estructurada en un draft listo para un canal concreto. Aplica voz, formato del canal y ángulo de la idea. Soporta repurpose de una publicación existente a otro canal.
+metadata:
+  author: r-bart
+  version: "0.1.0"
 ---
 
 # draft — Idea + canal → publicación

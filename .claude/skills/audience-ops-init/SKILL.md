@@ -1,6 +1,9 @@
 ---
 name: audience-ops-init
 description: Bootstrap del repo Audience Ops (si está vacío) o añade un nuevo proyecto. Encadena la creación de estructura, estrategia, voz y canales en un flujo guiado.
+metadata:
+  author: r-bart
+  version: "0.1.0"
 ---
 
 # init — Bootstrap del repo + primer proyecto
